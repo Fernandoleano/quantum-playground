@@ -110,22 +110,7 @@
     width: 60%; height: 60px; transform: translateX(-50%);
     background: radial-gradient(ellipse, rgba(255,255,255,.06), transparent 70%);
   }
-  #lattice { transform-style: preserve-3d; width: 0; height: 0; position: relative; }
-  #lattice, #lattice * { transform-style: preserve-3d; }
-  .cell { position: absolute; }
-  .face {
-    position: absolute; width: 54px; height: 54px; left: -27px; top: -27px;
-    border: 1px solid rgba(255,255,255,.10);
-    backface-visibility: hidden;
-  }
-  /* lighting by orientation: top brightest, front lit, sides falling off */
-  .face.f0 { background: linear-gradient(155deg, #171717, #0A0A0A); }   /* front */
-  .face.f1 { background: linear-gradient(155deg, #0D0D0D, #050505); }   /* right */
-  .face.f2 { background: #040404; }                                      /* back */
-  .face.f3 { background: linear-gradient(155deg, #0A0A0A, #040404); }   /* left */
-  .face.f4 { background: linear-gradient(170deg, #202020, #101010); }   /* top */
-  .face.f5 { background: #030303; }                                      /* bottom */
-  .cell.hot .face { background: #1A0705; border-color: rgba(248,112,102,.6); box-shadow: 0 0 26px rgba(248,112,102,.3) inset; }
+  #gl { width: 100%; height: 100%; display: block; }
   .cube-caption {
     position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
     font-family: var(--mono); font-size: .68rem; color: var(--dim); white-space: nowrap;
@@ -276,7 +261,7 @@
       </div>
     </div>
     <div class="cube-stage" aria-label="A lattice of dark cubes, one glowing red — the vulnerable node">
-      <div id="lattice"></div>
+      <canvas id="gl"></canvas>
       <div class="cube-caption">lattice cryptography — <b>one weak cell</b> is all it takes</div>
     </div>
   </div>
@@ -383,43 +368,6 @@ python scanner.py /path/to/your/project</pre>
   "use strict";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- lattice cube: 3x3x3 cells, CSS 3D, slow rotation ---------- */
-  const lattice = document.getElementById("lattice");
-  const STEP = 62, HALF = 27; // cell spacing & half face size
-  const FACES = [
-    "rotateY(0deg) translateZ(" + HALF + "px)",
-    "rotateY(90deg) translateZ(" + HALF + "px)",
-    "rotateY(180deg) translateZ(" + HALF + "px)",
-    "rotateY(-90deg) translateZ(" + HALF + "px)",
-    "rotateX(90deg) translateZ(" + HALF + "px)",
-    "rotateX(-90deg) translateZ(" + HALF + "px)",
-  ];
-  const hotIndex = 22; // one vulnerable cell, slightly off-center
-  let idx = 0;
-  for (let ix = -1; ix <= 1; ix++)
-    for (let iy = -1; iy <= 1; iy++)
-      for (let iz = -1; iz <= 1; iz++) {
-        const cell = document.createElement("div");
-        cell.className = "cell" + (idx === hotIndex ? " hot" : "");
-        cell.style.transform = "translate3d(" + ix * STEP + "px," + iy * STEP + "px," + iz * STEP + "px)";
-        FACES.forEach((f, fi) => {
-          const face = document.createElement("div");
-          face.className = "face f" + fi;
-          face.style.transform = f;
-          cell.appendChild(face);
-        });
-        lattice.appendChild(cell);
-        idx++;
-      }
-  let a = -0.4, b = 0.7;
-  function spin() {
-    a += 0.0016; b += 0.0022;
-    lattice.style.transform = "rotateX(" + (Math.sin(a) * 0.35 - 0.4) + "rad) rotateY(" + b + "rad)";
-    requestAnimationFrame(spin);
-  }
-  if (!reduced) spin();
-  else lattice.style.transform = "rotateX(-0.4rad) rotateY(0.6rad)";
-
   /* ---------- reveals ---------- */
   const rio = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); }
@@ -495,6 +443,116 @@ python scanner.py /path/to/your/project</pre>
     }), { threshold: .4 }).observe(svg);
   }
 })();
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+/* Hero object: 3x3x3 lattice built from a real glTF cube model —
+   Khronos glTF-Sample-Assets "BoxVertexColors" (CC0 1.0, public domain).
+   Model is embedded below as base64 so the page works offline/file://;
+   the original file lives at assets/cube.glb. */
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const GLB_B64 = "Z2xURgIAAACEBwAAwAMAAEpTT057ImFjY2Vzc29ycyI6W3siYnVmZmVyVmlldyI6MCwiYnl0ZU9mZnNldCI6MCwiY29tcG9uZW50VHlwZSI6NTEyMywiY291bnQiOjM2LCJ0eXBlIjoiU0NBTEFSIiwibWF4IjpbMjNdLCJtaW4iOlswXX0seyJidWZmZXJWaWV3IjoxLCJieXRlT2Zmc2V0IjowLCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6MjQsInR5cGUiOiJWRUMzIiwibWF4IjpbMS4wLDEuMCwxLjBdLCJtaW4iOlswLjAsMC4wLDAuMF19LHsiYnVmZmVyVmlldyI6MSwiYnl0ZU9mZnNldCI6Mjg4LCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6MjQsInR5cGUiOiJWRUMzIiwibWF4IjpbMS4wLDEuMCwxLjBdLCJtaW4iOlstMS4wLC0xLjAsLTEuMF19LHsiYnVmZmVyVmlldyI6MSwiYnl0ZU9mZnNldCI6NTc2LCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6MjQsInR5cGUiOiJWRUMzIiwibWF4IjpbMS4wLDEuMCwxLjBdLCJtaW4iOlswLjAsMC4wLDAuMF19XSwiYXNzZXQiOnsiZ2VuZXJhdG9yIjoiSmdsVEYgZnJvbSBodHRwczovL2dpdGh1Yi5jb20vamF2YWdsL0pnbFRGIiwidmVyc2lvbiI6IjIuMCJ9LCJidWZmZXJzIjpbeyJieXRlTGVuZ3RoIjo5MzZ9XSwiYnVmZmVyVmlld3MiOlt7Im5hbWUiOiJpbmRpY2VzIGJ1ZmZlclZpZXciLCJidWZmZXIiOjAsImJ5dGVPZmZzZXQiOjAsImJ5dGVMZW5ndGgiOjcyLCJ0YXJnZXQiOjM0OTYzfSx7Im5hbWUiOiJhdHRyaWJ1dGVzIGJ1ZmZlclZpZXciLCJidWZmZXIiOjAsImJ5dGVPZmZzZXQiOjcyLCJieXRlTGVuZ3RoIjo4NjQsImJ5dGVTdHJpZGUiOjEyLCJ0YXJnZXQiOjM0OTYyfV0sIm1lc2hlcyI6W3sicHJpbWl0aXZlcyI6W3siYXR0cmlidXRlcyI6eyJQT1NJVElPTiI6MSwiTk9STUFMIjoyLCJDT0xPUl8wIjozfSwiaW5kaWNlcyI6MCwibW9kZSI6NH1dfV0sIm5vZGVzIjpbeyJtZXNoIjowfV0sInNjZW5lIjowLCJzY2VuZXMiOlt7Im5vZGVzIjpbMF19XX2oAwAAQklOAAAAAgABAAAAAwACAAQABgAFAAQABwAGAAgACgAJAAgACwAKAAwADgANAAwADwAOABAAEgARABAAEwASABQAFgAVABQAFwAWAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAIA/AACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAACAPwAAgD8AAAAAAACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAIA/AACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAACAPwAAgD8AAAAAAACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAA==";
+
+try {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canvas = document.getElementById("gl");
+  const stage = canvas.parentElement;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+  camera.position.set(4.8, 3.4, 9.4);
+  camera.lookAt(0, 0, 0);
+
+  // studio-ish lighting: soft environment + key + cool rim
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const key = new THREE.DirectionalLight(0xffffff, 1.6);
+  key.position.set(4, 6, 3);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0xbfd8ff, 0.5);
+  rim.position.set(-5, 2, -4);
+  scene.add(rim);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.08));
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const bytes = Uint8Array.from(atob(GLB_B64), c => c.charCodeAt(0));
+  new GLTFLoader().parse(bytes.buffer, "", gltf => {
+    let geo = null;
+    gltf.scene.traverse(o => { if (o.isMesh && !geo) geo = o.geometry; });
+    geo.center(); // model is a unit cube from (0,0,0)-(1,1,1); recenter on origin
+    geo.deleteAttribute("color"); // drop sample vertex colors; we light it ourselves
+
+    const dark = new THREE.MeshStandardMaterial({
+      color: 0x0c0c0c, metalness: 0.5, roughness: 0.34, envMapIntensity: 0.8,
+    });
+    const hot = new THREE.MeshStandardMaterial({
+      color: 0x140505, metalness: 0.3, roughness: 0.5,
+      emissive: 0xf87066, emissiveIntensity: 0.55,
+    });
+    const hotLight = new THREE.PointLight(0xf87066, 2.2, 3.2);
+    const GAP = 1.14, HOT = 22;
+    let i = 0;
+    for (let x = -1; x <= 1; x++)
+      for (let y = -1; y <= 1; y++)
+        for (let z = -1; z <= 1; z++) {
+          const m = new THREE.Mesh(geo, i === HOT ? hot : dark);
+          m.position.set(x * GAP, y * GAP, z * GAP);
+          group.add(m);
+          if (i === HOT) { hotLight.position.copy(m.position); group.add(hotLight); }
+          i++;
+        }
+
+    fit(); reduced ? renderer.render(scene, camera) : loop();
+  }, err => console.warn("model load failed:", err));
+
+  // smooth motion: constant slow yaw + critically-damped pointer parallax
+  let yaw = 0.65, targetPX = 0, targetPY = 0, px = 0, py = 0;
+  addEventListener("pointermove", e => {
+    targetPX = (e.clientX / innerWidth - 0.5) * 0.5;
+    targetPY = (e.clientY / innerHeight - 0.5) * 0.3;
+  }, { passive: true });
+
+  const clock = new THREE.Clock();
+  function loop() {
+    const dt = Math.min(clock.getDelta(), 0.05);
+    yaw += dt * 0.14;                       // one revolution ≈ 45s
+    const k = 1 - Math.exp(-3.5 * dt);      // framerate-independent damping
+    px += (targetPX - px) * k;
+    py += (targetPY - py) * k;
+    group.rotation.set(-0.42 + py, yaw + px, 0);
+    group.position.y = Math.sin(clock.elapsedTime * 0.6) * 0.06;
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+
+  function fit() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    if (reduced) renderer.render(scene, camera);
+  }
+  new ResizeObserver(fit).observe(stage);
+} catch (e) {
+  console.warn("WebGL hero disabled:", e);
+}
 </script>
 </body>
 </html>
