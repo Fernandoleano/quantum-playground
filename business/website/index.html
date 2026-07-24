@@ -736,7 +736,7 @@ try {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-  camera.position.set(4.8, 3.4, 9.4);
+  camera.position.set(4.0, 2.85, 7.9);
   camera.lookAt(0, 0, 0);
 
   // studio-ish lighting: soft environment + key + cool rim
@@ -748,7 +748,10 @@ try {
   const rim = new THREE.DirectionalLight(0xbfd8ff, 0.5);
   rim.position.set(-5, 2, -4);
   scene.add(rim);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.08));
+  const fill = new THREE.DirectionalLight(0x9fb6d4, 0.5);
+  fill.position.set(-3, 0.5, 5);
+  scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.22));
 
   const group = new THREE.Group();
   scene.add(group);
@@ -761,7 +764,7 @@ try {
     geo.deleteAttribute("color"); // drop sample vertex colors; we light it ourselves
 
     const dark = new THREE.MeshStandardMaterial({
-      color: 0x0c0c0c, metalness: 0.5, roughness: 0.34, envMapIntensity: 0.8,
+      color: 0x181818, metalness: 0.5, roughness: 0.34, envMapIntensity: 1.05,
     });
     const hot = new THREE.MeshStandardMaterial({
       color: 0x140505, metalness: 0.3, roughness: 0.5,
