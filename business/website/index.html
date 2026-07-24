@@ -768,7 +768,7 @@ try {
       emissive: 0xf87066, emissiveIntensity: 0.55,
     });
     const hotLight = new THREE.PointLight(0xf87066, 2.2, 3.2);
-    const GAP = 1.14, HOT = 22;
+    const GAP = 1.03, HOT = 22;
     let i = 0;
     for (let x = -1; x <= 1; x++)
       for (let y = -1; y <= 1; y++)
@@ -795,8 +795,8 @@ try {
      After each turn, cell transforms are snapped back to the grid so
      floating-point drift never accumulates. */
   const cells = [];
-  const GAPC = 1.14, TWIST_DUR = 0.85;
-  let twist = null, twistWait = 1.6;
+  const GAPC = 1.03, TWIST_DUR = 0.5;
+  let twist = null, twistWait = 0.8;
   const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   function startTwist() {
     const axis = "xyz"[(Math.random() * 3) | 0];
@@ -828,13 +828,13 @@ try {
     });
     group.remove(pivot);
     twist = null;
-    twistWait = 1.2 + Math.random() * 1.8;
+    twistWait = 0.5 + Math.random() * 0.9;
   }
 
   const clock = new THREE.Clock();
   function loop() {
     const dt = Math.min(clock.getDelta(), 0.05);
-    yaw += dt * 0.11;
+    yaw += dt * 0.2;
     const k = 1 - Math.exp(-3.5 * dt);      // framerate-independent damping
     px += (targetPX - px) * k;
     py += (targetPY - py) * k;
