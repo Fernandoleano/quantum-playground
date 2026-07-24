@@ -23,7 +23,14 @@
     --mono: "IBM Plex Mono", ui-monospace, monospace;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #2A2A2A #000; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: #000; }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #2E2E2E, #1C1C1C);
+    border-radius: 99px; border: 2px solid #000;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #3D3D3D; }
   body {
     font-family: var(--sans); background: var(--bg); color: var(--ink);
     line-height: 1.6; font-size: 15px; overflow-x: hidden;
@@ -149,16 +156,8 @@
   }
   .chart-title { font-size: .88rem; color: var(--ink); font-weight: 500; margin-bottom: 3px; }
   .chart-sub { font-size: .78rem; color: var(--dim); margin-bottom: 20px; }
-  #chart { width: 100%; height: auto; display: block; }
-  #chart text { font-family: var(--mono); font-size: 11px; fill: var(--dim); }
-  #chart .threshold-label { fill: var(--red); }
-  #chart .series-label { fill: var(--gray); }
-  .tooltip {
-    position: absolute; pointer-events: none; opacity: 0; transition: opacity .12s;
-    background: #111; border: 1px solid var(--hairline-2); border-radius: 8px;
-    font-family: var(--mono); font-size: .72rem; color: var(--ink);
-    padding: 8px 11px; white-space: nowrap; z-index: 5;
-  }
+  .lap-stage { height: 500px; }
+  #lap { width: 100%; height: 100%; display: block; }
 
   /* ---------- steps ---------- */
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; margin-top: 44px; }
@@ -199,8 +198,8 @@
   /* arches carry their own centering transform — fadeUp would erase it */
   .arch.reveal.in { animation-name: archIn; }
   @keyframes archIn {
-    from { opacity: 0; transform: translateX(-50%) translateY(30px); }
-    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    from { opacity: 0; transform: translateX(-50%) translateY(40px) scale(.96); filter: blur(8px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); filter: blur(0); }
   }
 
   /* ---------- animated code window ---------- */
@@ -290,9 +289,12 @@
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 
   /* ---------- motion ---------- */
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); filter: blur(10px); }
+    to   { opacity: 1; transform: none; filter: blur(0); }
+  }
   .reveal { opacity: 0; }
-  .reveal.in { animation: fadeUp .8s cubic-bezier(.2,.6,.2,1) forwards; }
+  .reveal.in { animation: fadeUp .95s cubic-bezier(.16,1,.3,1) both; }
   .hero .stagger > * { opacity: 0; animation: fadeUp .9s cubic-bezier(.2,.6,.2,1) forwards; }
   .hero .stagger > *:nth-child(1) { animation-delay: .05s; }
   .hero .stagger > *:nth-child(2) { animation-delay: .15s; }
@@ -366,11 +368,9 @@
 
     <div class="chart-panel reveal">
       <div class="chart-title">Record qubits in a single processor, by year</div>
-      <div class="chart-sub">log scale — progress is exponential; the dashed red line is where RSA-2048 falls</div>
-      <div style="position:relative">
-        <svg id="chart" viewBox="0 0 900 360" role="img" aria-label="Log-scale line chart: record qubit counts per processor grew from 27 in 2019 to over 1000 in 2023; a dashed projection reaches the red 20-million-qubit RSA-2048 threshold in the mid-2030s."></svg>
-        <div class="tooltip" id="tip"></div>
-      </div>
+      <div class="chart-sub">log scale on the laptop — real counts 2019–2023, dashed projection; the red line is where RSA-2048 falls (~20M qubits, Gidney–Ekerå)</div>
+      <!-- "Classic Laptop" model from Poly Haven (CC0) — chart is drawn onto its screen -->
+      <div class="lap-stage"><canvas id="lap"></canvas></div>
     </div>
   </div>
 </section>
@@ -512,10 +512,19 @@ python scanner.py /path/to/your/project</pre>
   "use strict";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- reveals ---------- */
+  /* ---------- reveals: auto-applied, staggered per section ---------- */
+  document.querySelectorAll("section").forEach(sec => {
+    sec.querySelectorAll(":scope .kicker, :scope h2, :scope > .wrap > p, :scope .human-grid p, :scope .human-grid .kicker, :scope .human-grid h2, :scope pre.clone, :scope a.repo")
+      .forEach(n => n.classList.add("reveal"));
+    let i = 0;
+    sec.querySelectorAll(".reveal").forEach(n => { n.style.animationDelay = (i++ * 0.09) + "s"; });
+  });
+  document.querySelectorAll(".stats .stat").forEach((n, i) => {
+    n.classList.add("reveal"); n.style.animationDelay = (i * 0.12) + "s";
+  });
   const rio = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); }
-  }), { threshold: .2 });
+  }), { threshold: .15, rootMargin: "0px 0px -8% 0px" });
   document.querySelectorAll(".reveal").forEach(n => rio.observe(n));
   /* animated code window: reveal chunks in sequence, caption follows */
   const codewin = document.getElementById("codewin");
@@ -540,70 +549,6 @@ python scanner.py /path/to/your/project</pre>
     if (e.isIntersecting) { playCode(); o.unobserve(codewin); }
   }), { threshold: .35 }).observe(codewin);
 
-  /* ---------- chart: record qubits per processor, log scale ---------- */
-  const DATA = [
-    [2019, 27, "Falcon"], [2020, 65, "Hummingbird"], [2021, 127, "Eagle"],
-    [2022, 433, "Osprey"], [2023, 1121, "Condor"],
-  ];
-  const THRESH = 2e7;
-  const svg = document.getElementById("chart");
-  const NS = "http://www.w3.org/2000/svg";
-  const W = 900, H = 360, M = { l: 60, r: 26, t: 24, b: 38 };
-  const x = yr => M.l + (yr - 2019) / (2036 - 2019) * (W - M.l - M.r);
-  const y = q => H - M.b - (Math.log10(q) / 8) * (H - M.t - M.b);
-  function make(tag, attrs, parent) {
-    const n = document.createElementNS(NS, tag);
-    for (const k in attrs) n.setAttribute(k, attrs[k]);
-    (parent || svg).appendChild(n); return n;
-  }
-  const SUP = { 2: "²", 4: "⁴", 6: "⁶", 8: "⁸" };
-  for (let e = 0; e <= 8; e += 2) {
-    const gy = y(Math.pow(10, e) || 1);
-    make("line", { x1: M.l, x2: W - M.r, y1: gy, y2: gy, stroke: "rgba(255,255,255,.06)", "stroke-width": 1 });
-    const t = make("text", { x: M.l - 10, y: gy + 4, "text-anchor": "end" });
-    t.textContent = e === 0 ? "1" : "10" + SUP[e];
-  }
-  for (const yr of [2019, 2023, 2027, 2031, 2035]) {
-    const t = make("text", { x: x(yr), y: H - M.b + 24, "text-anchor": "middle" });
-    t.textContent = yr;
-  }
-  const ty = y(THRESH);
-  make("line", { x1: M.l, x2: W - M.r, y1: ty, y2: ty, stroke: "#F87066", "stroke-width": 1, "stroke-dasharray": "5 6", opacity: .8 });
-  const tl = make("text", { x: W - M.r, y: ty - 9, "text-anchor": "end", class: "threshold-label" });
-  tl.textContent = "RSA-2048 falls here — ~20M qubits";
-  let d = "";
-  DATA.forEach((p, i) => { d += (i ? "L" : "M") + x(p[0]) + " " + y(p[1]) + " "; });
-  const path = make("path", { d, fill: "none", stroke: "#EDEDED", "stroke-width": 1.8, "stroke-linecap": "round" });
-  const rate = Math.pow(1121 / 27, 1 / 4);
-  let pd = "M" + x(2023) + " " + y(1121) + " ", py = 2023, pq = 1121;
-  while (pq < THRESH * 1.6 && py < 2036) { py += 1; pq *= rate; pd += "L" + x(py) + " " + y(pq) + " "; }
-  make("path", { d: pd, fill: "none", stroke: "rgba(237,237,237,.35)", "stroke-width": 1.4, "stroke-dasharray": "2 6", "stroke-linecap": "round" });
-  const sl = make("text", { x: x(2020.6), y: y(27) + 26, class: "series-label" });
-  sl.textContent = "record qubits (real)";
-  const pl = make("text", { x: x(2028.4), y: y(1.1e5) });
-  pl.textContent = "if the trend holds…";
-  const tip = document.getElementById("tip");
-  DATA.forEach(p => {
-    make("circle", { cx: x(p[0]), cy: y(p[1]), r: 3.5, fill: "#EDEDED", stroke: "#000", "stroke-width": 2 });
-    const hit = make("circle", { cx: x(p[0]), cy: y(p[1]), r: 14, fill: "transparent", style: "cursor:pointer" });
-    hit.addEventListener("mouseenter", () => {
-      tip.textContent = p[0] + " · IBM " + p[2] + " · " + p[1].toLocaleString() + " qubits";
-      tip.style.opacity = 1;
-      const box = svg.getBoundingClientRect();
-      tip.style.left = (x(p[0]) / W * box.width + 12) + "px";
-      tip.style.top = (y(p[1]) / H * box.height - 34) + "px";
-    });
-    hit.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
-  });
-  if (!reduced) {
-    const len = path.getTotalLength();
-    path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
-    new IntersectionObserver((es, o) => es.forEach(e => {
-      if (!e.isIntersecting) return;
-      path.style.transition = "stroke-dashoffset 1.6s ease";
-      path.style.strokeDashoffset = 0; o.unobserve(svg);
-    }), { threshold: .4 }).observe(svg);
-  }
 })();
 </script>
 
@@ -733,6 +678,128 @@ try {
   new ResizeObserver(fit).observe(stage);
 } catch (e) {
   console.warn("WebGL hero disabled:", e);
+}
+
+/* Laptop chart: Poly Haven "Classic Laptop" model (CC0) with the qubit
+   chart drawn live onto its screen material. */
+try {
+  const reduced2 = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const lapCanvas = document.getElementById("lap");
+  const stage2 = lapCanvas.parentElement;
+
+  const r2 = new THREE.WebGLRenderer({ canvas: lapCanvas, antialias: true, alpha: true });
+  r2.setPixelRatio(Math.min(devicePixelRatio, 2));
+  r2.toneMapping = THREE.ACESFilmicToneMapping;
+  r2.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene2 = new THREE.Scene();
+  const cam2 = new THREE.PerspectiveCamera(30, 1, 0.05, 50);
+  cam2.position.set(0.8, 2.3, 3.3);
+  cam2.lookAt(0, 0.05, 0);
+
+  const pm2 = new THREE.PMREMGenerator(r2);
+  scene2.environment = pm2.fromScene(new RoomEnvironment(), 0.04).texture;
+  const key2 = new THREE.DirectionalLight(0xffffff, 1.1);
+  key2.position.set(2, 4, 3);
+  scene2.add(key2, new THREE.AmbientLight(0xffffff, 0.15));
+
+  /* chart drawn to a canvas, used as the screen texture */
+  const cv = document.createElement("canvas");
+  cv.width = 1024; cv.height = 768;
+  const cx2 = cv.getContext("2d");
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.flipY = false;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; // screen UVs live in u 1..2
+  tex.anisotropy = 8;
+
+  const LDATA = [[2019, 27], [2020, 65], [2021, 127], [2022, 433], [2023, 1121]];
+  const lrate = Math.pow(1121 / 27, 1 / 4), LTHRESH = 2e7;
+  const LX = yr => 90 + (yr - 2019) / (2036 - 2019) * 844;
+  const LY = q => 678 - (Math.log10(q) / 8) * 560;
+  const lpts = LDATA.map(p => [LX(p[0]), LY(p[1])]);
+  { let q = 1121; for (let yr = 2024; yr <= 2035 && q < LTHRESH * 1.6; yr++) { q *= lrate; lpts.push([LX(yr), LY(q)]); } }
+
+  function drawChart(prog) {
+    cx2.fillStyle = "#07090C";
+    cx2.fillRect(0, 0, 1024, 768);
+    cx2.strokeStyle = "rgba(255,255,255,.08)"; cx2.lineWidth = 2;
+    for (let e = 0; e <= 8; e += 2) {
+      const gy = LY(Math.pow(10, e) || 1);
+      cx2.beginPath(); cx2.moveTo(80, gy); cx2.lineTo(944, gy); cx2.stroke();
+    }
+    cx2.font = "600 30px 'IBM Plex Mono', monospace";
+    cx2.fillStyle = "#5A6570";
+    for (const yr of [2019, 2027, 2035]) cx2.fillText(String(yr), LX(yr) - 34, 738);
+    const ty = LY(LTHRESH);
+    cx2.strokeStyle = "#F87066"; cx2.setLineDash([14, 10]);
+    cx2.beginPath(); cx2.moveTo(80, ty); cx2.lineTo(944, ty); cx2.stroke();
+    cx2.setLineDash([]);
+    cx2.fillStyle = "#F87066";
+    cx2.fillText("RSA-2048 falls here", 560, ty - 18);
+    const n = Math.max(2, Math.round(lpts.length * prog));
+    cx2.strokeStyle = "#EDEDED"; cx2.lineWidth = 6; cx2.lineJoin = "round"; cx2.lineCap = "round";
+    cx2.beginPath();
+    lpts.slice(0, n).forEach((p, i) => i ? cx2.lineTo(p[0], p[1]) : cx2.moveTo(p[0], p[1]));
+    cx2.stroke();
+    const h = lpts[Math.min(n - 1, lpts.length - 1)];
+    cx2.shadowColor = "#FFFFFF"; cx2.shadowBlur = 26; cx2.fillStyle = "#FFFFFF";
+    cx2.beginPath(); cx2.arc(h[0], h[1], 9, 0, 7); cx2.fill();
+    cx2.shadowBlur = 0;
+    tex.needsUpdate = true;
+  }
+  drawChart(reduced2 ? 1 : 0.15);
+
+  let lap = null;
+  new GLTFLoader().load("assets/laptop/classic_laptop_1k.gltf", g => {
+    lap = g.scene;
+    const box = new THREE.Box3().setFromObject(lap);
+    const ctr = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    lap.position.sub(ctr);
+    lap.scale.setScalar(2.05 / Math.max(size.x, size.y, size.z));
+    lap.traverse(o => {
+      if (o.isMesh && o.material && /screen/i.test(o.material.name + o.name)) {
+        o.material = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
+      }
+    });
+    scene2.add(lap);
+    window.__lap = { lap, tex, r2, scene2, cam2, THREE };
+    fit2();
+    if (reduced2) r2.render(scene2, cam2);
+  });
+
+  /* scroll-linked rotation + chart draw-on, active only while visible */
+  let visible = false, prog = 0.15;
+  const clock2 = new THREE.Clock();
+  function loop2() {
+    if (!visible) return;
+    const dt = Math.min(clock2.getDelta(), 0.05);
+    if (prog < 1) { prog = Math.min(1, prog + dt * 0.16); drawChart(prog); }
+    if (lap) {
+      const rect = stage2.getBoundingClientRect();
+      const sp = Math.min(1, Math.max(0, 1 - rect.top / innerHeight)); // 0→1 as section scrolls in
+      lap.rotation.y = -0.2 + (sp - 0.5) * 0.3 + Math.sin(clock2.elapsedTime * 0.4) * 0.04;
+      lap.rotation.x = -0.12 + (1 - sp) * 0.08;
+    }
+    r2.render(scene2, cam2);
+    requestAnimationFrame(loop2);
+  }
+  new IntersectionObserver(es => es.forEach(e => {
+    visible = e.isIntersecting && !reduced2;
+    if (visible) { clock2.getDelta(); loop2(); }
+  }), { threshold: 0.15 }).observe(stage2);
+
+  function fit2() {
+    const w = stage2.clientWidth, h = stage2.clientHeight;
+    r2.setSize(w, h, false);
+    cam2.aspect = w / h;
+    cam2.updateProjectionMatrix();
+    if (reduced2 || !visible) r2.render(scene2, cam2);
+  }
+  new ResizeObserver(fit2).observe(stage2);
+} catch (e) {
+  console.warn("Laptop chart disabled:", e);
 }
 </script>
 </body>
