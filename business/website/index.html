@@ -285,8 +285,18 @@
   .contact { text-align: center; padding: 140px 0; }
   .contact h2 { font-size: clamp(2.4rem, 4.6vw, 3.6rem); }
   .contact p { margin: 0 auto 40px; }
-  footer { border-top: 1px solid var(--hairline); padding: 30px 0; font-size: .78rem; color: var(--dim); }
-  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  footer { border-top: 1px solid var(--hairline); padding: 34px 0 0; font-size: .78rem; color: var(--dim); }
+  .foot-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .foot-top .flogo { font-weight: 600; font-size: 1rem; color: var(--ink); }
+  .foot-top nav { display: flex; gap: 22px; }
+  .foot-top nav a { color: var(--dim); text-decoration: none; }
+  .foot-top nav a:hover { color: var(--ink); }
+  .dots-stage { position: relative; height: 320px; margin-top: 26px; cursor: crosshair; }
+  #dots { width: 100%; height: 100%; display: block; }
+  .foot-bottom {
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    padding: 18px 0 26px; border-top: 1px solid var(--hairline);
+  }
 
   /* ---------- motion ---------- */
   @keyframes fadeUp {
@@ -502,8 +512,21 @@ python scanner.py /path/to/your/project</pre>
 
 <footer>
   <div class="wrap">
-    <span>Shorproof — post-quantum cryptography audits</span>
-    <span>RSA is temporary. Lattices are forever.</span>
+    <div class="foot-top">
+      <span class="flogo">Shorproof</span>
+      <nav aria-label="Footer">
+        <a href="#threat">Threat</a>
+        <a href="#process">Process</a>
+        <a href="#proof">Scanner</a>
+        <a href="mailto:fernandoleano4@gmail.com">Contact</a>
+      </nav>
+      <span>© 2026</span>
+    </div>
+    <div class="dots-stage"><canvas id="dots" aria-hidden="true"></canvas></div>
+    <div class="foot-bottom">
+      <span>Post-quantum cryptography audits</span>
+      <span>RSA is temporary. Lattices are forever.</span>
+    </div>
   </div>
 </footer>
 
@@ -549,6 +572,86 @@ python scanner.py /path/to/your/project</pre>
     if (e.isIntersecting) { playCode(); o.unobserve(codewin); }
   }), { threshold: .35 }).observe(codewin);
 
+  /* ---------- dot-matrix footer: brand text in dots, cursor ripple ---------- */
+  (function () {
+    const cvs = document.getElementById("dots");
+    const stage = cvs.parentElement;
+    const ctx = cvs.getContext("2d");
+    const dpr = Math.min(devicePixelRatio, 2);
+    let dots = [], W = 0, H = 0;
+    let mx = -9e3, my = -9e3, cx = -9e3, cy = -9e3; // target & eased cursor
+
+    function build() {
+      W = stage.clientWidth; H = stage.clientHeight;
+      cvs.width = W * dpr; cvs.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // mask: brand word rendered offscreen, sampled per dot
+      const m = document.createElement("canvas");
+      m.width = W; m.height = H;
+      const mc = m.getContext("2d");
+      mc.font = "800 " + Math.min(W / 5.2, 200) + "px Inter, sans-serif";
+      mc.textAlign = "center"; mc.textBaseline = "middle";
+      mc.fillStyle = "#fff";
+      mc.fillText("shorproof", W / 2, H / 2 + 8);
+      const px = mc.getImageData(0, 0, W, H).data;
+      const GAP = 22;
+      dots = [];
+      for (let y = GAP / 2; y < H; y += GAP)
+        for (let x = GAP / 2; x < W; x += GAP) {
+          const inText = px[((y | 0) * W + (x | 0)) * 4 + 3] > 60;
+          dots.push({
+            x, y, inText,
+            base: inText ? 0.62 : 0.10 + Math.random() * 0.05,
+            r: inText ? 2.7 : 1.9,
+            ph: Math.random() * 6.28,
+          });
+        }
+    }
+    build();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+    new ResizeObserver(build).observe(stage);
+
+    stage.addEventListener("pointermove", e => {
+      const r = cvs.getBoundingClientRect();
+      mx = e.clientX - r.left; my = e.clientY - r.top;
+    }, { passive: true });
+    stage.addEventListener("pointerleave", () => { mx = -9e3; my = -9e3; });
+
+    let vis = false, t = 0;
+    function draw() {
+      if (!vis) return;
+      t += 0.016;
+      cx += (mx - cx) * 0.12; cy += (my - cy) * 0.12; // trailing ease
+      ctx.clearRect(0, 0, W, H);
+      const S2 = 2 * 110 * 110; // falloff sigma
+      for (const d of dots) {
+        const dx = d.x - cx, dy = d.y - cy;
+        const f = Math.exp(-(dx * dx + dy * dy) / S2);
+        const wave = 0.04 * Math.sin(t * 0.9 + d.ph + d.x * 0.008);
+        const a = Math.min(1, d.base + wave + f * 0.85);
+        const rr = d.r * (1 + f * 1.7);
+        ctx.fillStyle = f > 0.5 && !d.inText
+          ? "rgba(248,112,102," + a.toFixed(3) + ")"
+          : "rgba(237,237,237," + a.toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, rr, 0, 6.2832);
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    function drawStatic() {
+      ctx.clearRect(0, 0, W, H);
+      for (const d of dots) {
+        ctx.fillStyle = "rgba(237,237,237," + d.base.toFixed(3) + ")";
+        ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, 6.2832); ctx.fill();
+      }
+    }
+    if (reduced) { drawStatic(); }
+    else new IntersectionObserver(es => es.forEach(e => {
+      vis = e.isIntersecting;
+      if (vis) draw();
+    }), { threshold: 0.1 }).observe(stage);
+  })();
 })();
 </script>
 
