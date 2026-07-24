@@ -237,6 +237,19 @@
     animation: breathe 6s ease-in-out infinite;
   }
   .analyst-stage #lottie, .analyst-stage img { position: relative; width: 100%; height: auto; display: block; }
+  .crypto-chips { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  .crypto-chips .chip {
+    position: absolute; background: rgba(0,0,0,.65); backdrop-filter: blur(2px);
+    animation: chipfloat 5.5s ease-in-out infinite;
+  }
+  .crypto-chips .chip s { text-decoration-thickness: 2px; }
+  .crypto-chips .c1 { top: 12%; left: 4%;  animation-delay: 0s; }
+  .crypto-chips .c2 { top: 38%; left: 0%;  animation-delay: 1.2s; }
+  .crypto-chips .c3 { top: 4%;  left: 38%; animation-delay: 2.1s; }
+  .crypto-chips .c4 { top: 10%; right: 4%; animation-delay: .7s; }
+  .crypto-chips .c5 { top: 34%; right: 0%; animation-delay: 1.7s; }
+  @keyframes chipfloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @media (prefers-reduced-motion: reduce) { .crypto-chips .chip { animation: none; } }
   @keyframes breathe { 0%,100% { opacity: .7; } 50% { opacity: 1; } }
 
   /* ---------- terminal ---------- */
@@ -462,8 +475,16 @@ python scanner.py /path/to/your/project</pre>
       <p>Automated scanners flag; they don't judge. Every hit in your report is triaged by a person who asks the questions a regex can't: is this key live, what data does it protect, and how long does that data need to stay secret? <strong>You get findings that matter, not noise.</strong></p>
     </div>
     <div class="analyst-stage reveal">
-      <!-- "Coding" animation by Promise Mphoola via LottieFiles (Lottie Simple License — free commercial use) -->
-      <div id="lottie" role="img" aria-label="Animation of a developer typing at a desk with code on multiple monitors"></div>
+      <!-- "Coding" animation by Promise Mphoola via LottieFiles (Lottie Simple License — free
+           commercial use). Language-badge layers hidden in the JSON; crypto chips overlaid below. -->
+      <div id="lottie" role="img" aria-label="Animation of an analyst typing at a desk with code on multiple monitors, surrounded by cryptography labels"></div>
+      <div class="crypto-chips" aria-hidden="true">
+        <span class="chip bad c1"><s>RSA-2048</s></span>
+        <span class="chip bad c2"><s>ECDSA</s></span>
+        <span class="chip c3">AES-128 → AES-256</span>
+        <span class="chip good c4">ML-KEM-768</span>
+        <span class="chip good c5">ML-DSA</span>
+      </div>
     </div>
   </div>
 </section>
