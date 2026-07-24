@@ -16,6 +16,9 @@ build/
 dist/
 *.egg-info/
 
+# Secrets — API tokens live here, never in git
+.env
+
 # macOS
 .DS_Store
 
