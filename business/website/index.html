@@ -236,8 +236,7 @@
     background: radial-gradient(ellipse at 60% 55%, rgba(178,132,255,.16), transparent 65%);
     animation: breathe 6s ease-in-out infinite;
   }
-  .analyst-stage img { position: relative; width: 100%; height: auto; display: block; animation: floaty 7s ease-in-out infinite; }
-  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  .analyst-stage #lottie, .analyst-stage img { position: relative; width: 100%; height: auto; display: block; }
   @keyframes breathe { 0%,100% { opacity: .7; } 50% { opacity: 1; } }
 
   /* ---------- terminal ---------- */
@@ -463,7 +462,8 @@ python scanner.py /path/to/your/project</pre>
       <p>Automated scanners flag; they don't judge. Every hit in your report is triaged by a person who asks the questions a regex can't: is this key live, what data does it protect, and how long does that data need to stay secret? <strong>You get findings that matter, not noise.</strong></p>
     </div>
     <div class="analyst-stage reveal">
-      <img src="assets/analyst.svg" alt="Illustration of an analyst working on a laptop at night" loading="lazy" width="1109" height="748">
+      <!-- "Coding" animation by Promise Mphoola via LottieFiles (Lottie Simple License — free commercial use) -->
+      <div id="lottie" role="img" aria-label="Animation of a developer typing at a desk with code on multiple monitors"></div>
     </div>
   </div>
 </section>
@@ -583,6 +583,25 @@ python scanner.py /path/to/your/project</pre>
       path.style.strokeDashoffset = 0; o.unobserve(svg);
     }), { threshold: .4 }).observe(svg);
   }
+})();
+</script>
+
+<script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js" integrity="sha384-J8C0MvgX4WP58J4N2W99vCKd2J6z99ynOJ5bEfE6jeP7kVTW1drYtv/jzrxM5jbm" crossorigin="anonymous"></script>
+<script>
+(function () {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const box = document.getElementById("lottie");
+  function fallback() {
+    box.outerHTML = '<img src="assets/analyst.svg" alt="Illustration of an analyst working on a laptop at night" loading="lazy" width="1109" height="748">';
+  }
+  if (!window.lottie) { fallback(); return; }
+  try {
+    const anim = lottie.loadAnimation({
+      container: box, renderer: "svg", loop: true, autoplay: !reduced, path: "assets/coding.json",
+    });
+    anim.addEventListener("data_failed", fallback);
+    if (reduced) anim.addEventListener("DOMLoaded", () => anim.goToAndStop(45, true));
+  } catch (e) { fallback(); }
 })();
 </script>
 
