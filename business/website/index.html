@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shorproof — Post-Quantum Cryptography Audits</title>
+<title>Shorproof | Post-Quantum Cryptography Audits</title>
 <meta name="description" content="Quantum computers will break RSA and elliptic-curve encryption. Shorproof finds where your systems are exposed and plans your migration to NIST post-quantum standards.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -222,7 +222,7 @@
     background: #B284FF; border-radius: 99px; padding: 8px 18px;
   }
   .arch.reveal.in, .arch-row.reveal.in { animation-duration: 1s; }
-  /* arches carry their own centering transform — fadeUp would erase it */
+  /* arches carry their own centering transform; fadeUp would erase it */
   .arch.reveal.in { animation-name: archIn; }
   @keyframes archIn {
     from { opacity: 0; transform: translateX(-50%) translateY(40px) scale(.96); filter: blur(8px); }
@@ -382,16 +382,16 @@
         <a class="link-quiet" href="#proof">Try the free scanner</a>
       </div>
     </div>
-    <div class="cube-stage" aria-label="A lattice of dark cubes, one glowing red — the vulnerable node">
+    <div class="cube-stage" aria-label="A lattice of dark cubes, one glowing red: the vulnerable node">
       <canvas id="gl"></canvas>
-      <div class="cube-caption">lattice cryptography — <b>one weak cell</b> is all it takes</div>
+      <div class="cube-caption">lattice cryptography: <b>one weak cell</b> is all it takes</div>
     </div>
   </div>
 </section>
 
 <div class="wrap">
   <div class="stats" id="stats">
-    <div class="stat"><div class="num red">20M</div><div class="lbl">noisy qubits to break RSA-2048 in ~8 hours — Gidney–Ekerå estimate</div></div>
+    <div class="stat"><div class="num red">20M</div><div class="lbl">noisy qubits to break RSA-2048 in ~8 hours (Gidney–Ekerå estimate)</div></div>
     <div class="stat"><div class="num">2035</div><div class="lbl">US federal deadline to complete migration off quantum-vulnerable crypto</div></div>
     <div class="stat"><div class="num">203·204·205</div><div class="lbl">NIST FIPS post-quantum standards, final since August 2024</div></div>
   </div>
@@ -401,11 +401,11 @@
   <div class="wrap">
     <div class="kicker">Why now</div>
     <h2>Harvest now, <em>decrypt later.</em></h2>
-    <p>Adversaries don't need a quantum computer today to hurt you today. Encrypted traffic — customer records, contracts, health data — is being <strong>recorded now</strong> and stored until quantum hardware can open it. Anything with a shelf life longer than the quantum timeline is already exposed.</p>
+    <p>Adversaries don't need a quantum computer today to hurt you today. Encrypted traffic like customer records, contracts, and health data is being <strong>recorded now</strong> and stored until quantum hardware can open it. Anything with a shelf life longer than the quantum timeline is already exposed.</p>
 
     <div class="chart-panel reveal">
       <div class="chart-title">Record qubits in a single processor, by year</div>
-      <div class="chart-sub">log scale — real counts 2019–2023, dashed projection; the red line is where RSA-2048 falls (~20M qubits, Gidney–Ekerå)</div>
+      <div class="chart-sub">log scale. Real counts 2019–2023 with a dashed projection; the red line is where RSA-2048 falls (~20M qubits, Gidney–Ekerå)</div>
       <div style="position:relative">
         <svg id="chart" viewBox="0 0 900 360" role="img" aria-label="Log-scale line chart: record qubit counts per processor grew from 27 in 2019 to over 1000 in 2023; a dashed projection reaches the red 20-million-qubit RSA-2048 threshold in the mid-2030s."></svg>
         <div class="tooltip" id="tip"></div>
@@ -423,7 +423,7 @@
       <div class="step reveal">
         <div class="step-art"><img src="assets/cards/inventory.svg" alt="" loading="lazy"></div>
         <div class="step-body">
-          <div class="num">01 — INVENTORY</div>
+          <div class="num">01 / INVENTORY</div>
           <h3>Find every lock</h3>
           <p>We scan your codebases, configs, certificates, and dependencies to map exactly where quantum-vulnerable cryptography lives. File-by-file report.</p>
           <a class="step-link" href="#proof">Run the scanner yourself <span class="ar">→</span></a>
@@ -432,16 +432,16 @@
       <div class="step reveal">
         <div class="step-art"><img src="assets/cards/plan.svg" alt="" loading="lazy"></div>
         <div class="step-body">
-          <div class="num">02 — PLAN</div>
+          <div class="num">02 / PLAN</div>
           <h3>Rank the risk</h3>
-          <p>Findings ranked by exposure and data lifetime, then a migration plan to ML-KEM and ML-DSA — with hybrid schemes that keep you compatible during transition.</p>
+          <p>Findings ranked by exposure and data lifetime, then a migration plan to ML-KEM and ML-DSA, with hybrid schemes that keep you compatible during transition.</p>
           <a class="step-link" href="#threat">See why timing matters <span class="ar">→</span></a>
         </div>
       </div>
       <div class="step reveal">
         <div class="step-art"><img src="assets/cards/migrate.svg" alt="" loading="lazy"></div>
         <div class="step-body">
-          <div class="num">03 — MIGRATE</div>
+          <div class="num">03 / MIGRATE</div>
           <h3>Close the surface</h3>
           <p>We work alongside your engineers to swap primitives, re-issue certificates, and verify with a re-scan that proves the surface is closed.</p>
           <a class="step-link" href="#contact">Book the audit <span class="ar">→</span></a>
@@ -461,7 +461,7 @@
       <div class="arch a2 reveal"></div>
       <div class="arch a3 reveal"></div>
       <div class="arch-row reveal" style="top: 26px;">
-        <div class="tier"><span class="dot-k" style="background:#666"></span>Today — the vulnerable perimeter</div>
+        <div class="tier"><span class="dot-k" style="background:#666"></span>Today: the vulnerable perimeter</div>
         <div class="chips">
           <span class="chip bad">RSA-2048</span>
           <span class="chip bad">ECDSA / ECDH</span>
@@ -469,14 +469,14 @@
         </div>
       </div>
       <div class="arch-row reveal" style="top: 196px;">
-        <div class="tier"><span class="dot-k" style="background:#7AA2F7"></span>Transition — hybrid schemes</div>
+        <div class="tier"><span class="dot-k" style="background:#7AA2F7"></span>Transition: hybrid schemes</div>
         <div class="chips">
           <span class="chip">X25519 + ML-KEM</span>
           <span class="chip">dual certificates</span>
         </div>
       </div>
       <div class="arch-row reveal" style="top: 330px;">
-        <div class="tier"><span class="dot-k" style="background:#B284FF"></span>Core — post-quantum</div>
+        <div class="tier"><span class="dot-k" style="background:#B284FF"></span>Core: post-quantum</div>
         <div class="chips">
           <span class="chip good">ML-KEM-768</span>
           <span class="chip good">ML-DSA</span>
@@ -491,7 +491,7 @@
   <div class="wrap">
     <div class="kicker">Proof, not promises</div>
     <h2>Our scanner is <em>open source.</em></h2>
-    <p>Run it on your own code before you ever talk to us. If it finds nothing, you don't need us — and you'll know either way in under a minute.</p>
+    <p>Run it on your own code before you ever talk to us. If it finds nothing, you don't need us, and you'll know either way in under a minute.</p>
 
     <div class="codewin" id="codewin">
       <div class="codewin-bar">
@@ -527,7 +527,7 @@ python scanner.py /path/to/your/project</pre>
       <p>Automated scanners flag; they don't judge. Every hit in your report is triaged by a person who asks the questions a regex can't: is this key live, what data does it protect, and how long does that data need to stay secret? <strong>You get findings that matter, not noise.</strong></p>
     </div>
     <div class="analyst-stage reveal">
-      <!-- "Coding" animation by Promise Mphoola via LottieFiles (Lottie Simple License — free
+      <!-- "Coding" animation by Promise Mphoola via LottieFiles (Lottie Simple License, free
            commercial use). Language-badge layers hidden in the JSON; crypto chips overlaid below. -->
       <div id="lottie" role="img" aria-label="Animation of an analyst typing at a desk with code on multiple monitors, surrounded by cryptography labels"></div>
       <div class="crypto-chips" aria-hidden="true">
@@ -546,7 +546,7 @@ python scanner.py /path/to/your/project</pre>
   <div class="wrap">
     <div class="kicker">Get started</div>
     <h2>Book a <em>readiness audit.</em></h2>
-    <p>Fixed scope, fixed price. Full crypto inventory, risk ranking, and a migration plan your team can execute — with or without us.</p>
+    <p>Fixed scope, fixed price. Full crypto inventory, risk ranking, and a migration plan your team can execute, with or without us.</p>
     <a class="btn" href="mailto:fernandoleano4@gmail.com?subject=PQC%20Readiness%20Audit">Email us to book</a>
   </div>
 </section>
@@ -731,7 +731,7 @@ python scanner.py /path/to/your/project</pre>
     const ty = y(THRESH);
     make("line", { x1: M.l, x2: W - M.r, y1: ty, y2: ty, stroke: "#F87066", "stroke-width": 1, "stroke-dasharray": "5 6", opacity: .85 });
     const tl = make("text", { x: W - M.r, y: ty - 9, "text-anchor": "end", class: "threshold-label" });
-    tl.textContent = "RSA-2048 falls here — ~20M qubits";
+    tl.textContent = "RSA-2048 falls here: ~20M qubits";
     // area under the real line
     let ad = "M" + x(2019) + " " + y(1);
     DATA.forEach(p => { ad += " L" + x(p[0]) + " " + y(p[1]); });
@@ -815,7 +815,7 @@ python scanner.py /path/to/your/project</pre>
 } }
 </script>
 <script type="module">
-/* Hero object: 3x3x3 lattice built from a real glTF cube model —
+/* Hero object: 3x3x3 lattice built from a real glTF cube model,
    Khronos glTF-Sample-Assets "BoxVertexColors" (CC0 1.0, public domain).
    Model is embedded below as base64 so the page works offline/file://;
    the original file lives at assets/cube.glb. */
