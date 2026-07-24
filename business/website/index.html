@@ -776,7 +776,8 @@ try {
           const m = new THREE.Mesh(geo, i === HOT ? hot : dark);
           m.position.set(x * GAP, y * GAP, z * GAP);
           group.add(m);
-          if (i === HOT) { hotLight.position.copy(m.position); group.add(hotLight); }
+          cells.push(m);
+          if (i === HOT) m.add(hotLight); // light rides the weak cell through twists
           i++;
         }
 
@@ -790,15 +791,67 @@ try {
     targetPY = (e.clientY / innerHeight - 0.5) * 0.3;
   }, { passive: true });
 
+  /* Rubik-style layer twists: every few seconds a random slice turns 90°.
+     After each turn, cell transforms are snapped back to the grid so
+     floating-point drift never accumulates. */
+  const cells = [];
+  const GAPC = 1.14, TWIST_DUR = 0.85;
+  let twist = null, twistWait = 1.6;
+  const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function startTwist() {
+    const axis = "xyz"[(Math.random() * 3) | 0];
+    const layer = [-1, 0, 1][(Math.random() * 3) | 0];
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const pivot = new THREE.Group();
+    group.add(pivot);
+    const moving = cells.filter(c => Math.round(c.position[axis] / GAPC) === layer);
+    moving.forEach(c => pivot.attach(c));
+    twist = { pivot, axis, dir, moving, t: 0 };
+  }
+  function endTwist() {
+    const { pivot, axis, dir, moving } = twist;
+    pivot.rotation[axis] = dir * Math.PI / 2;
+    pivot.updateMatrixWorld(true);
+    moving.forEach(c => {
+      group.attach(c);
+      // snap to exact grid position and right-angle orientation
+      c.position.set(
+        Math.round(c.position.x / GAPC) * GAPC,
+        Math.round(c.position.y / GAPC) * GAPC,
+        Math.round(c.position.z / GAPC) * GAPC
+      );
+      c.rotation.set(
+        Math.round(c.rotation.x / (Math.PI / 2)) * Math.PI / 2,
+        Math.round(c.rotation.y / (Math.PI / 2)) * Math.PI / 2,
+        Math.round(c.rotation.z / (Math.PI / 2)) * Math.PI / 2
+      );
+    });
+    group.remove(pivot);
+    twist = null;
+    twistWait = 1.2 + Math.random() * 1.8;
+  }
+
   const clock = new THREE.Clock();
   function loop() {
     const dt = Math.min(clock.getDelta(), 0.05);
-    yaw += dt * 0.14;                       // one revolution ≈ 45s
+    yaw += dt * 0.11;
     const k = 1 - Math.exp(-3.5 * dt);      // framerate-independent damping
     px += (targetPX - px) * k;
     py += (targetPY - py) * k;
     group.rotation.set(-0.42 + py, yaw + px, 0);
     group.position.y = Math.sin(clock.elapsedTime * 0.6) * 0.06;
+
+    if (cells.length === 27) {
+      if (twist) {
+        twist.t += dt / TWIST_DUR;
+        if (twist.t >= 1) endTwist();
+        else twist.pivot.rotation[twist.axis] = easeInOut(twist.t) * twist.dir * Math.PI / 2;
+      } else {
+        twistWait -= dt;
+        if (twistWait <= 0) startTwist();
+      }
+    }
+
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
   }
