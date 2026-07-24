@@ -28,12 +28,16 @@ def load_token() -> str:
     """Read IBM_QUANTUM_TOKEN from the environment or the local .env file."""
     token = os.environ.get("IBM_QUANTUM_TOKEN")
     if not token:
-        env_file = Path(__file__).parent / ".env"
-        if env_file.exists():
-            for line in env_file.read_text().splitlines():
-                line = line.strip()
-                if line.startswith("IBM_QUANTUM_TOKEN="):
-                    token = line.split("=", 1)[1].strip()
+        # Look for .env next to this script, then at the repo root.
+        for candidate in (Path(__file__).parent / ".env",
+                          Path(__file__).parents[1] / ".env"):
+            if candidate.exists():
+                for line in candidate.read_text().splitlines():
+                    line = line.strip()
+                    if line.startswith("IBM_QUANTUM_TOKEN="):
+                        token = line.split("=", 1)[1].strip()
+                if token:
+                    break
     if not token:
         sys.exit("No token found. Set IBM_QUANTUM_TOKEN in .env — see docstring.")
     return token

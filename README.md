@@ -22,12 +22,19 @@ pip install -r requirements.txt
 
 Deactivate anytime with `deactivate`.
 
+## Project layout
+
+```
+quantum_coin/   learning scripts (Bell state, quantum coin, IBM hardware runner)
+business/       the business: PQC scanner + website (see business/README.md)
+```
+
 ## Scripts
 
-### `bell_state.py` — entanglement demo
+### `quantum_coin/bell_state.py` — entanglement demo
 
 ```bash
-python bell_state.py
+python quantum_coin/bell_state.py
 ```
 
 Builds the Bell state (|00⟩ + |11⟩)/√2 with a Hadamard + CNOT, measures
@@ -37,10 +44,10 @@ You will **never** see `01` or `10` — those outcomes have zero amplitude
 in the entangled state. The exact split varies run to run; that's
 quantum measurement statistics, not a bug.
 
-### `quantum_coin.py` — true random bit generator
+### `quantum_coin/quantum_coin.py` — true random bit generator
 
 ```bash
-python quantum_coin.py
+python quantum_coin/quantum_coin.py
 ```
 
 Flips a "quantum coin" 16 times: one qubit, Hadamard, measure, 1 shot
