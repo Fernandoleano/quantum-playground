@@ -169,6 +169,77 @@
   .step h3 { font-family: var(--serif); font-weight: 400; font-size: 1.45rem; margin: 14px 0 10px; }
   .step p { font-size: .88rem; color: var(--gray); }
 
+  /* ---------- migration map (layered arch) ---------- */
+  .arch-stage { position: relative; height: 470px; margin-top: 56px; overflow: hidden; }
+  .arch {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    transform-origin: bottom center;
+  }
+  .arch.a1 { width: 820px; height: 410px; background: radial-gradient(ellipse at 50% 100%, transparent 55%, rgba(255,255,255,.055) 76%); border: 1px solid rgba(255,255,255,.09); border-bottom: 0; }
+  .arch.a2 { width: 560px; height: 280px; background: radial-gradient(ellipse at 50% 100%, transparent 46%, rgba(122,162,247,.13) 78%); border: 1px solid rgba(122,162,247,.25); border-bottom: 0; }
+  .arch.a3 { width: 320px; height: 160px; background: radial-gradient(ellipse at 50% 100%, rgba(178,132,255,.10) 20%, rgba(178,132,255,.22) 80%); border: 1px solid rgba(178,132,255,.35); border-bottom: 0; }
+  .arch-row { position: absolute; left: 0; right: 0; text-align: center; z-index: 2; }
+  .arch-row .tier { font-size: .82rem; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+  .arch-row .tier .dot-k { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 8px; vertical-align: 1px; }
+  .chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .chip {
+    font-family: var(--mono); font-size: .7rem; color: var(--gray);
+    border: 1px solid var(--hairline-2); border-radius: 99px; padding: 4px 12px;
+    background: rgba(0,0,0,.45);
+  }
+  .chip.bad { color: var(--red); border-color: rgba(248,112,102,.35); }
+  .chip.good { color: var(--green); border-color: rgba(110,231,183,.3); }
+  .arch-core {
+    position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 2;
+    font-family: var(--mono); font-size: .78rem; color: #000; font-weight: 600;
+    background: #B284FF; border-radius: 99px; padding: 8px 18px;
+  }
+  .arch.reveal.in, .arch-row.reveal.in { animation-duration: 1s; }
+  /* arches carry their own centering transform — fadeUp would erase it */
+  .arch.reveal.in { animation-name: archIn; }
+  @keyframes archIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* ---------- animated code window ---------- */
+  .codewin {
+    position: relative; border: 1px solid var(--hairline); border-radius: 12px;
+    background: #0A0A0A; overflow: hidden; margin-top: 44px;
+  }
+  .codewin-bar { display: flex; align-items: center; gap: 6px; padding: 13px 18px; border-bottom: 1px solid var(--hairline); }
+  .codewin-bar span { color: var(--dim); font-family: var(--mono); font-size: .72rem; margin-left: 10px; }
+  .codewin pre {
+    font-family: var(--mono); font-size: .8rem; line-height: 1.75;
+    padding: 22px 24px 26px; color: var(--gray); overflow-x: auto; margin: 0;
+  }
+  .codewin .chunk { display: block; opacity: 0; transform: translateY(6px); transition: opacity .6s ease, transform .6s ease; }
+  .codewin .chunk.show { opacity: 1; transform: none; }
+  .k { color: #7AA2F7; } .s { color: var(--green); } .c { color: var(--dim); }
+  .f { color: var(--ink); } .n { color: #B284FF; }
+  .code-caption {
+    position: absolute; right: 22px; bottom: 24px; max-width: 260px;
+    background: #F5F5F5; color: #111; font-size: .82rem; font-weight: 500;
+    line-height: 1.45; padding: 14px 16px; border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    opacity: 0; transform: translateY(8px);
+    transition: opacity .45s ease, transform .45s ease;
+  }
+  .code-caption.show { opacity: 1; transform: none; }
+
+  /* ---------- analyst (illustration) ---------- */
+  .human-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .analyst-stage { position: relative; }
+  .analyst-stage::before {
+    content: ""; position: absolute; inset: 8% 6%;
+    background: radial-gradient(ellipse at 60% 55%, rgba(178,132,255,.16), transparent 65%);
+    animation: breathe 6s ease-in-out infinite;
+  }
+  .analyst-stage img { position: relative; width: 100%; height: auto; display: block; animation: floaty 7s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  @keyframes breathe { 0%,100% { opacity: .7; } 50% { opacity: 1; } }
+
   /* ---------- terminal ---------- */
   .terminal {
     border: 1px solid var(--hairline); border-radius: 12px;
@@ -316,32 +387,84 @@
   </div>
 </section>
 
+<section id="map">
+  <div class="wrap">
+    <div class="kicker">The migration map</div>
+    <h2>From vulnerable perimeter to <em>quantum-safe core.</em></h2>
+    <p>Every audit maps your cryptography onto three rings. The work of migration is moving everything inward.</p>
+    <div class="arch-stage">
+      <div class="arch a1 reveal"></div>
+      <div class="arch a2 reveal"></div>
+      <div class="arch a3 reveal"></div>
+      <div class="arch-row reveal" style="top: 26px;">
+        <div class="tier"><span class="dot-k" style="background:#666"></span>Today — the vulnerable perimeter</div>
+        <div class="chips">
+          <span class="chip bad">RSA-2048</span>
+          <span class="chip bad">ECDSA / ECDH</span>
+          <span class="chip bad">Diffie-Hellman</span>
+        </div>
+      </div>
+      <div class="arch-row reveal" style="top: 196px;">
+        <div class="tier"><span class="dot-k" style="background:#7AA2F7"></span>Transition — hybrid schemes</div>
+        <div class="chips">
+          <span class="chip">X25519 + ML-KEM</span>
+          <span class="chip">dual certificates</span>
+        </div>
+      </div>
+      <div class="arch-row reveal" style="top: 330px;">
+        <div class="tier"><span class="dot-k" style="background:#B284FF"></span>Core — post-quantum</div>
+        <div class="chips">
+          <span class="chip good">ML-KEM-768</span>
+          <span class="chip good">ML-DSA</span>
+        </div>
+      </div>
+      <div class="arch-core">quantum-safe</div>
+    </div>
+  </div>
+</section>
+
 <section id="proof">
   <div class="wrap">
     <div class="kicker">Proof, not promises</div>
     <h2>Our scanner is <em>open source.</em></h2>
     <p>Run it on your own code before you ever talk to us. If it finds nothing, you don't need us — and you'll know either way in under a minute.</p>
 
-    <div class="terminal">
-      <div class="terminal-bar">
+    <div class="codewin" id="codewin">
+      <div class="codewin-bar">
         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        <span>pqc-scan — your-api/</span>
+        <span>audit.py</span>
       </div>
-      <div class="terminal-body" id="term">
-        <div class="line t-ink">$ pqc-scan ./your-api --report</div>
-        <div class="line t-dim">scanning 1,204 files…</div>
-        <div class="line"><span class="t-red">CRITICAL</span>  auth/tokens.py:41   RSA-2048 key generation</div>
-        <div class="line"><span class="t-red">CRITICAL</span>  tls/config.yml:12   ECDHE key exchange</div>
-        <div class="line"><span class="t-dim">WARNING </span>  crypto/cipher.go:8  AES-128-GCM</div>
-        <div class="line"><span class="t-green">SAFE    </span>  vault/kem.rs:3      ML-KEM-768 (FIPS 203)</div>
-        <div class="line t-dim">14 critical · 6 warnings · 2 quantum-safe</div>
-      </div>
+      <pre><code><span class="chunk" data-caption="Point it at any codebase."><span class="k">from</span> pathlib <span class="k">import</span> Path
+<span class="k">from</span> scanner <span class="k">import</span> <span class="f">scan</span>, <span class="f">print_report</span>
+</span><span class="chunk" data-caption="Every file, every config, every certificate.">
+findings = <span class="f">scan</span>(Path(<span class="s">"./your-api"</span>))
+</span><span class="chunk" data-caption="Shor-breakable crypto, ranked by severity.">
+critical = [f <span class="k">for</span> f <span class="k">in</span> findings <span class="k">if</span> f.severity == <span class="s">"CRITICAL"</span>]
+<span class="k">for</span> f <span class="k">in</span> critical:
+    <span class="f">print</span>(<span class="s">f"{f.file}:{f.line}  {f.algorithm}"</span>)
+</span><span class="chunk" data-caption="Your migration plan starts here.">
+<span class="f">print_report</span>(findings, root=Path(<span class="s">"./your-api"</span>))
+<span class="c"># → 14 critical · 6 warnings · 2 quantum-safe</span></span></code></pre>
+      <div class="code-caption" id="codecap"></div>
     </div>
 
     <pre class="clone">git clone https://github.com/Fernandoleano/quantum-playground
 cd quantum-playground/business/pqc_scanner
 python scanner.py /path/to/your/project</pre>
     <a class="repo" href="https://github.com/Fernandoleano/quantum-playground">github.com/Fernandoleano/quantum-playground</a>
+  </div>
+</section>
+
+<section id="human">
+  <div class="wrap human-grid">
+    <div>
+      <div class="kicker">Behind the scanner</div>
+      <h2>A human reads <em>every finding.</em></h2>
+      <p>Automated scanners flag; they don't judge. Every hit in your report is triaged by a person who asks the questions a regex can't: is this key live, what data does it protect, and how long does that data need to stay secret? <strong>You get findings that matter, not noise.</strong></p>
+    </div>
+    <div class="analyst-stage reveal">
+      <img src="assets/analyst.svg" alt="Illustration of an analyst working on a laptop at night" loading="lazy" width="1109" height="748">
+    </div>
   </div>
 </section>
 
@@ -373,10 +496,28 @@ python scanner.py /path/to/your/project</pre>
     if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); }
   }), { threshold: .2 });
   document.querySelectorAll(".reveal").forEach(n => rio.observe(n));
-  const term = document.getElementById("term");
+  /* animated code window: reveal chunks in sequence, caption follows */
+  const codewin = document.getElementById("codewin");
+  const chunks = [...codewin.querySelectorAll(".chunk")];
+  const cap = document.getElementById("codecap");
+  function playCode() {
+    if (reduced) {
+      chunks.forEach(c => c.classList.add("show"));
+      cap.textContent = chunks[chunks.length - 1].dataset.caption;
+      cap.classList.add("show");
+      return;
+    }
+    let i = 0;
+    (function next() {
+      if (i >= chunks.length) { setTimeout(() => cap.classList.remove("show"), 2400); return; }
+      chunks[i].classList.add("show");
+      cap.classList.remove("show");
+      setTimeout(() => { cap.textContent = chunks[i].dataset.caption; cap.classList.add("show"); i++; setTimeout(next, 1800); }, 250);
+    })();
+  }
   new IntersectionObserver((es, o) => es.forEach(e => {
-    if (e.isIntersecting) { term.classList.add("play"); o.unobserve(term); }
-  }), { threshold: .3 }).observe(term);
+    if (e.isIntersecting) { playCode(); o.unobserve(codewin); }
+  }), { threshold: .35 }).observe(codewin);
 
   /* ---------- chart: record qubits per processor, log scale ---------- */
   const DATA = [
