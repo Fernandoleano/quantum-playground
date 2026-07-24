@@ -7,164 +7,197 @@
 <meta name="description" content="Quantum computers will break RSA and elliptic-curve encryption. Shorproof finds where your systems are exposed and plans your migration to NIST post-quantum standards.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #070D16;
-    --panel: #0B1420;
-    --panel-2: #0E1A2A;
-    --line: rgba(63,224,208,.12);
-    --ink: #DCE7F2;
-    --muted: #7A8CA0;
-    --cyan: #3FE0D0;
-    --red: #FF6B4A;
-    --green: #4ADE9C;
-    --amber: #FFD166;
+    --bg: #000000;
+    --ink: #EDEDED;
+    --gray: #A1A1A1;
+    --dim: #666666;
+    --hairline: rgba(255,255,255,.08);
+    --hairline-2: rgba(255,255,255,.14);
+    --red: #F87066;
+    --green: #6EE7B7;
+    --serif: "Instrument Serif", Georgia, serif;
+    --sans: "Inter", -apple-system, sans-serif;
     --mono: "IBM Plex Mono", ui-monospace, monospace;
-    --sans: "Archivo", -apple-system, sans-serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
     font-family: var(--sans); background: var(--bg); color: var(--ink);
-    line-height: 1.65; overflow-x: hidden;
+    line-height: 1.6; font-size: 15px; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
-  ::selection { background: rgba(63,224,208,.25); }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; position: relative; }
+  ::selection { background: rgba(255,255,255,.2); }
 
-  /* cipher rain sits behind everything */
-  #rain { position: fixed; inset: 0; z-index: 0; opacity: .16; pointer-events: none; }
-  main, header.site, footer { position: relative; z-index: 1; }
+  /* film grain + light wash */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+  .glow {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .glow::before {
+    content: ""; position: absolute; top: -30%; right: -10%;
+    width: 80%; height: 120%;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,.05) 0%, transparent 60%);
+  }
+  .glow::after {
+    content: ""; position: absolute; bottom: 0; left: -20%;
+    width: 140%; height: 40%;
+    background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.035) 50%, transparent 70%);
+    transform: rotate(-4deg);
+  }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
 
   /* ---------- header ---------- */
-  header.site {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 26px 0; border-bottom: 1px solid var(--line);
+  header.site { padding: 22px 0; }
+  header.site .wrap { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: var(--sans); font-weight: 600; font-size: 1rem; letter-spacing: -.02em; color: var(--ink); text-decoration: none; }
+  nav { display: flex; align-items: center; gap: 28px; }
+  nav a { font-size: .85rem; color: var(--gray); text-decoration: none; transition: color .15s; }
+  nav a:hover, nav a:focus-visible { color: var(--ink); }
+  nav a.pill-cta {
+    background: var(--ink); color: #000; font-weight: 500;
+    padding: 8px 16px; border-radius: 99px;
   }
-  header.site .wrap { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-  .logo { font-family: var(--mono); font-weight: 600; font-size: 1.05rem; color: var(--ink); }
-  .logo .safe { color: var(--cyan); }
-  .logo::before { content: "▲ "; color: var(--cyan); font-size: .8em; }
-  nav a {
-    font-family: var(--mono); font-size: .82rem; color: var(--muted);
-    text-decoration: none; margin-left: 28px;
-  }
-  nav a:hover, nav a:focus-visible { color: var(--cyan); }
+  nav a.pill-cta:hover { background: #fff; color: #000; }
 
   /* ---------- hero ---------- */
-  .hero {
-    display: grid; grid-template-columns: 1.05fr .95fr; gap: 40px;
-    align-items: center; padding: 72px 0 40px; min-height: 78vh;
+  .hero { position: relative; min-height: 88vh; display: flex; align-items: center; }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; width: 100%; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: .8rem; color: var(--gray); text-decoration: none;
+    border: 1px solid var(--hairline-2); border-radius: 99px;
+    padding: 6px 14px; margin-bottom: 32px;
+    background: linear-gradient(#000,#000) padding-box,
+                linear-gradient(90deg, rgba(248,112,102,.5), rgba(255,255,255,.25), rgba(110,231,183,.4)) border-box;
+    border: 1px solid transparent;
+    transition: color .15s;
   }
-  .eyebrow {
-    font-family: var(--mono); font-size: .75rem; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--cyan); font-weight: 600;
-  }
-  .eyebrow::before { content: "// "; color: var(--muted); }
+  .badge:hover { color: var(--ink); }
+  .badge .arrow { font-family: var(--mono); }
   h1 {
-    font-size: clamp(2.3rem, 4.8vw, 3.6rem); font-weight: 900;
-    line-height: 1.05; letter-spacing: -.03em; margin: 20px 0 22px;
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(3rem, 6.4vw, 5.2rem);
+    line-height: 1.02; letter-spacing: -.01em; margin-bottom: 26px;
   }
-  h1 .scramble { color: var(--red); }
-  .lede { font-size: 1.08rem; color: var(--muted); max-width: 46ch; margin-bottom: 34px; }
-  .lede strong { color: var(--ink); font-weight: 500; }
-
-  .btn-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
-  .cta {
+  h1 em { font-style: italic; color: var(--gray); }
+  .lede { color: var(--gray); font-size: 1.05rem; max-width: 42ch; margin-bottom: 36px; }
+  .btn-row { display: flex; align-items: center; gap: 26px; }
+  .btn {
     display: inline-flex; align-items: center; justify-content: center;
-    font-family: var(--mono); font-weight: 600; font-size: .92rem;
-    padding: 15px 26px; border-radius: 6px; text-decoration: none;
-    background: var(--cyan); color: #04211D; border: 1px solid var(--cyan);
-    transition: transform .15s ease, box-shadow .15s ease;
+    background: var(--ink); color: #000; font-weight: 500; font-size: .9rem;
+    padding: 12px 24px; border-radius: 99px; text-decoration: none;
+    transition: background .15s, transform .15s;
   }
-  .cta:hover, .cta:focus-visible { transform: translateY(-2px); box-shadow: 0 0 32px rgba(63,224,208,.35); }
-  .cta.secondary {
-    background: transparent; color: var(--cyan);
-    border: 1px solid rgba(63,224,208,.4);
-  }
-  .cta.secondary:hover { box-shadow: 0 0 24px rgba(63,224,208,.18); border-color: var(--cyan); }
+  .btn:hover, .btn:focus-visible { background: #fff; transform: translateY(-1px); }
+  .link-quiet { color: var(--gray); font-size: .9rem; text-decoration: none; transition: color .15s; }
+  .link-quiet:hover, .link-quiet:focus-visible { color: var(--ink); }
+  .link-quiet::after { content: " →"; }
 
-  .globe-box { position: relative; display: flex; justify-content: center; }
-  #globe { max-width: 100%; filter: drop-shadow(0 0 40px rgba(63,224,208,.12)); }
-  .globe-caption {
-    position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
-    font-family: var(--mono); font-size: .68rem; color: var(--muted); white-space: nowrap;
+  /* ---------- lattice cube ---------- */
+  .cube-stage {
+    display: flex; justify-content: center; align-items: center;
+    perspective: 1200px; height: 480px; position: relative;
   }
-  .globe-caption b { color: var(--red); font-weight: 600; }
+  .cube-stage::after { /* floor light */
+    content: ""; position: absolute; bottom: 40px; left: 50%;
+    width: 60%; height: 60px; transform: translateX(-50%);
+    background: radial-gradient(ellipse, rgba(255,255,255,.06), transparent 70%);
+  }
+  #lattice { transform-style: preserve-3d; width: 0; height: 0; position: relative; }
+  #lattice, #lattice * { transform-style: preserve-3d; }
+  .cell { position: absolute; }
+  .face {
+    position: absolute; width: 54px; height: 54px; left: -27px; top: -27px;
+    border: 1px solid rgba(255,255,255,.10);
+    backface-visibility: hidden;
+  }
+  /* lighting by orientation: top brightest, front lit, sides falling off */
+  .face.f0 { background: linear-gradient(155deg, #171717, #0A0A0A); }   /* front */
+  .face.f1 { background: linear-gradient(155deg, #0D0D0D, #050505); }   /* right */
+  .face.f2 { background: #040404; }                                      /* back */
+  .face.f3 { background: linear-gradient(155deg, #0A0A0A, #040404); }   /* left */
+  .face.f4 { background: linear-gradient(170deg, #202020, #101010); }   /* top */
+  .face.f5 { background: #030303; }                                      /* bottom */
+  .cell.hot .face { background: #1A0705; border-color: rgba(248,112,102,.6); box-shadow: 0 0 26px rgba(248,112,102,.3) inset; }
+  .cube-caption {
+    position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: .68rem; color: var(--dim); white-space: nowrap;
+  }
+  .cube-caption b { color: var(--red); font-weight: 500; }
 
-  /* ---------- stat band ---------- */
-  .stats {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
-    background: var(--line); border: 1px solid var(--line); border-radius: 10px;
-    overflow: hidden; margin: 24px 0 0;
+  /* ---------- shared section chrome ---------- */
+  section { padding: 104px 0; position: relative; }
+  .rule { border: 0; border-top: 1px solid var(--hairline); }
+  .kicker {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--dim); margin-bottom: 18px;
   }
-  .stat { background: var(--panel); padding: 26px 24px; }
-  .stat .num {
-    font-family: var(--mono); font-size: 1.9rem; font-weight: 600; color: var(--cyan);
-    letter-spacing: -.02em;
+  h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(2rem, 3.6vw, 2.9rem); line-height: 1.08;
+    letter-spacing: -.01em; margin-bottom: 18px;
   }
-  .stat .num.red { color: var(--red); }
-  .stat .lbl { font-size: .85rem; color: var(--muted); margin-top: 6px; }
-
-  /* ---------- sections ---------- */
-  section { padding: 88px 0; }
-  .section-label {
-    font-family: var(--mono); font-size: .75rem; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 14px;
-  }
-  .section-label::before { content: "// "; color: var(--cyan); }
-  h2 { font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 900; letter-spacing: -.02em; line-height: 1.15; margin-bottom: 16px; }
-  section > .wrap > p { color: var(--muted); max-width: 64ch; }
+  h2 em { font-style: italic; color: var(--gray); }
+  section p { color: var(--gray); max-width: 60ch; }
   section p strong { color: var(--ink); font-weight: 500; }
+
+  /* ---------- stats ---------- */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--hairline); }
+  .stat { padding: 30px 28px 30px 0; border-right: 1px solid var(--hairline); margin-right: 28px; }
+  .stat:last-child { border-right: 0; margin-right: 0; }
+  .stat .num { font-family: var(--serif); font-size: 2.4rem; color: var(--ink); line-height: 1.1; }
+  .stat .num.red { color: var(--red); }
+  .stat .lbl { font-size: .82rem; color: var(--dim); margin-top: 8px; line-height: 1.5; }
 
   /* ---------- chart ---------- */
   .chart-panel {
-    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-    padding: 28px 28px 18px; margin-top: 36px;
+    border: 1px solid var(--hairline); border-radius: 12px;
+    padding: 30px 30px 20px; margin-top: 44px;
+    background: linear-gradient(180deg, rgba(255,255,255,.02), transparent);
   }
-  .chart-title { font-family: var(--mono); font-size: .82rem; color: var(--ink); margin-bottom: 4px; }
-  .chart-sub { font-family: var(--mono); font-size: .72rem; color: var(--muted); margin-bottom: 18px; }
+  .chart-title { font-size: .88rem; color: var(--ink); font-weight: 500; margin-bottom: 3px; }
+  .chart-sub { font-size: .78rem; color: var(--dim); margin-bottom: 20px; }
   #chart { width: 100%; height: auto; display: block; }
-  #chart text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
-  #chart .threshold-label { fill: var(--red); font-weight: 600; }
-  #chart .series-label { fill: var(--cyan); font-weight: 600; }
+  #chart text { font-family: var(--mono); font-size: 11px; fill: var(--dim); }
+  #chart .threshold-label { fill: var(--red); }
+  #chart .series-label { fill: var(--gray); }
   .tooltip {
     position: absolute; pointer-events: none; opacity: 0; transition: opacity .12s;
-    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    background: #111; border: 1px solid var(--hairline-2); border-radius: 8px;
     font-family: var(--mono); font-size: .72rem; color: var(--ink);
-    padding: 8px 10px; white-space: nowrap; z-index: 5;
+    padding: 8px 11px; white-space: nowrap; z-index: 5;
   }
 
   /* ---------- steps ---------- */
-  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
-  .step {
-    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-    padding: 28px 24px; position: relative; overflow: hidden;
-    transition: transform .2s ease, border-color .2s ease;
-  }
-  .step:hover { transform: translateY(-4px); border-color: rgba(63,224,208,.35); }
-  .step .num { font-family: var(--mono); font-size: .72rem; color: var(--cyan); font-weight: 600; letter-spacing: .1em; }
-  .step h3 { font-size: 1.15rem; font-weight: 700; margin: 12px 0 8px; }
-  .step p { font-size: .93rem; color: var(--muted); }
-  .step .hexline {
-    font-family: var(--mono); font-size: .62rem; color: rgba(122,140,160,.35);
-    margin-top: 18px; overflow: hidden; white-space: nowrap;
-  }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; margin-top: 44px; }
+  .step { padding: 34px 30px; border-right: 1px solid var(--hairline); transition: background .2s; }
+  .step:last-child { border-right: 0; }
+  .step:hover { background: rgba(255,255,255,.025); }
+  .step .num { font-family: var(--mono); font-size: .7rem; color: var(--dim); letter-spacing: .14em; }
+  .step h3 { font-family: var(--serif); font-weight: 400; font-size: 1.45rem; margin: 14px 0 10px; }
+  .step p { font-size: .88rem; color: var(--gray); }
 
   /* ---------- terminal ---------- */
   .terminal {
-    background: #050B12; border: 1px solid var(--line); border-radius: 10px;
-    font-family: var(--mono); font-size: .8rem; overflow: hidden; margin-top: 36px;
-    box-shadow: 0 24px 80px rgba(63,224,208,.06);
+    border: 1px solid var(--hairline); border-radius: 12px;
+    font-family: var(--mono); font-size: .8rem; overflow: hidden; margin-top: 44px;
+    background: rgba(255,255,255,.015);
   }
-  .terminal-bar { display: flex; align-items: center; gap: 6px; padding: 12px 16px; background: rgba(63,224,208,.05); }
-  .dot { width: 11px; height: 11px; border-radius: 50%; background: #22303F; }
-  .terminal-bar span { color: var(--muted); font-size: .72rem; margin-left: 10px; }
-  .terminal-body { padding: 18px 20px 24px; color: #A9BACB; }
+  .terminal-bar { display: flex; align-items: center; gap: 6px; padding: 13px 18px; border-bottom: 1px solid var(--hairline); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #222; }
+  .terminal-bar span { color: var(--dim); font-size: .72rem; margin-left: 10px; }
+  .terminal-body { padding: 20px 22px 26px; color: var(--gray); }
   .terminal-body .line { opacity: 0; white-space: pre-wrap; }
   .terminal-body.play .line { animation: type .01s forwards; }
   .t-red { color: var(--red); } .t-green { color: var(--green); }
-  .t-yellow { color: var(--amber); } .t-dim { color: #55677A; } .t-cyan { color: var(--cyan); }
+  .t-dim { color: var(--dim); } .t-ink { color: var(--ink); }
   @keyframes type { to { opacity: 1; } }
   .terminal-body.play .line:nth-child(1) { animation-delay: .2s; }
   .terminal-body.play .line:nth-child(2) { animation-delay: .8s; }
@@ -173,99 +206,101 @@
   .terminal-body.play .line:nth-child(5) { animation-delay: 2.3s; }
   .terminal-body.play .line:nth-child(6) { animation-delay: 2.8s; }
   .terminal-body.play .line:nth-child(7) { animation-delay: 3.4s; }
-  .terminal-body.play .line:nth-child(8) { animation-delay: 4.0s; }
   pre.clone {
-    background: #050B12; border: 1px solid var(--line); color: #A9BACB;
-    font-family: var(--mono); font-size: .8rem; padding: 20px; border-radius: 8px;
-    overflow-x: auto; margin: 24px 0;
+    border: 1px solid var(--hairline); background: rgba(255,255,255,.015);
+    color: var(--gray); font-family: var(--mono); font-size: .8rem;
+    padding: 20px 22px; border-radius: 12px; overflow-x: auto; margin: 28px 0 16px;
   }
-  a.repo { color: var(--green); font-family: var(--mono); font-weight: 600; text-decoration: none; }
-  a.repo:hover { text-decoration: underline; }
+  a.repo { color: var(--ink); font-size: .85rem; text-decoration: none; border-bottom: 1px solid var(--hairline-2); padding-bottom: 1px; }
+  a.repo:hover { border-color: var(--ink); }
 
   /* ---------- contact ---------- */
-  .contact { text-align: center; padding: 110px 0; }
-  .contact p { margin: 0 auto 34px; }
-  .contact .wrap::before, .contact .wrap::after {
-    content: attr(data-cipher); display: block; font-family: var(--mono);
-    font-size: .65rem; color: rgba(63,224,208,.18); letter-spacing: .3em;
-    margin-bottom: 28px; word-break: break-all;
-  }
-  .contact .wrap::after { margin: 34px 0 0; }
-
-  footer {
-    font-family: var(--mono); font-size: .75rem; color: var(--muted);
-    padding: 30px 0; border-top: 1px solid var(--line);
-  }
+  .contact { text-align: center; padding: 140px 0; }
+  .contact h2 { font-size: clamp(2.4rem, 4.6vw, 3.6rem); }
+  .contact p { margin: 0 auto 40px; }
+  footer { border-top: 1px solid var(--hairline); padding: 30px 0; font-size: .78rem; color: var(--dim); }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  footer .safe { color: var(--cyan); }
 
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  /* ---------- motion ---------- */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
   .reveal { opacity: 0; }
-  .reveal.in { animation: fadeUp .7s ease forwards; }
+  .reveal.in { animation: fadeUp .8s cubic-bezier(.2,.6,.2,1) forwards; }
+  .hero .stagger > * { opacity: 0; animation: fadeUp .9s cubic-bezier(.2,.6,.2,1) forwards; }
+  .hero .stagger > *:nth-child(1) { animation-delay: .05s; }
+  .hero .stagger > *:nth-child(2) { animation-delay: .15s; }
+  .hero .stagger > *:nth-child(3) { animation-delay: .28s; }
+  .hero .stagger > *:nth-child(4) { animation-delay: .4s; }
 
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
-    .terminal-body .line, .reveal { opacity: 1 !important; }
+    .terminal-body .line, .reveal, .hero .stagger > * { opacity: 1 !important; }
     html { scroll-behavior: auto; }
   }
-  @media (max-width: 880px) {
-    .hero { grid-template-columns: 1fr; min-height: unset; padding: 44px 0 24px; }
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .cube-stage { height: 380px; }
     .stats, .steps { grid-template-columns: 1fr; }
-    nav a { margin-left: 14px; }
+    .stat { border-right: 0; border-bottom: 1px solid var(--hairline); margin-right: 0; padding-right: 0; }
+    .stat:last-child { border-bottom: 0; }
+    .step { border-right: 0; border-bottom: 1px solid var(--hairline); }
+    .step:last-child { border-bottom: 0; }
+    nav { gap: 16px; }
   }
 </style>
 </head>
 <body>
-<canvas id="rain" aria-hidden="true"></canvas>
 
 <header class="site">
   <div class="wrap">
-    <div class="logo">shor<span class="safe">proof</span></div>
+    <a class="logo" href="#">Shorproof</a>
     <nav aria-label="Main">
-      <a href="#threat">threat</a>
-      <a href="#process">process</a>
-      <a href="#proof">scanner</a>
-      <a href="#contact">contact</a>
+      <a href="#threat">Threat</a>
+      <a href="#process">Process</a>
+      <a href="#proof">Scanner</a>
+      <a class="pill-cta" href="#contact">Book an audit</a>
     </nav>
   </div>
 </header>
 
 <main>
-<div class="wrap">
-  <section class="hero">
-    <div>
-      <div class="eyebrow">Post-quantum cryptography audits</div>
-      <h1>Your encryption is <span class="scramble" data-text="breakable">breakable</span>.<br>It just doesn't know it yet.</h1>
-      <p class="lede">Quantum computers will break <strong>RSA and elliptic-curve cryptography</strong> — the locks on most of today's internet. We find every vulnerable lock in your systems and plan the migration to NIST post-quantum standards.</p>
+<section class="hero">
+  <div class="glow"></div>
+  <div class="wrap hero-grid">
+    <div class="stagger">
+      <a class="badge" href="#threat">NIST post-quantum standards are final <span class="arrow">→</span></a>
+      <h1>Encryption <em>built to outlive</em> the quantum computer.</h1>
+      <p class="lede">Quantum computers will break RSA and elliptic-curve cryptography. We find every vulnerable lock in your systems and plan the migration to post-quantum standards.</p>
       <div class="btn-row">
-        <a class="cta" href="#contact">Book a readiness audit</a>
-        <a class="cta secondary" href="#proof">Try the free scanner</a>
+        <a class="btn" href="#contact">Book a readiness audit</a>
+        <a class="link-quiet" href="#proof">Try the free scanner</a>
       </div>
     </div>
-    <div class="globe-box">
-      <canvas id="globe" width="520" height="520" aria-label="Rotating globe showing encrypted traffic being harvested worldwide"></canvas>
-      <div class="globe-caption">encrypted traffic — <b>harvested now, decrypted later</b></div>
+    <div class="cube-stage" aria-label="A lattice of dark cubes, one glowing red — the vulnerable node">
+      <div id="lattice"></div>
+      <div class="cube-caption">lattice cryptography — <b>one weak cell</b> is all it takes</div>
     </div>
-  </section>
+  </div>
+</section>
 
+<div class="wrap">
   <div class="stats" id="stats">
-    <div class="stat"><div class="num red" data-count="20000000" data-suffix="">0</div><div class="lbl">noisy qubits to break RSA-2048 in ~8 hours (Gidney–Ekerå estimate)</div></div>
-    <div class="stat"><div class="num" data-count="2035" data-plain="1">0</div><div class="lbl">US federal deadline to complete migration off vulnerable crypto</div></div>
-    <div class="stat"><div class="num" data-count="203" data-fips="1">0</div><div class="lbl">NIST FIPS 203 / 204 / 205 — post-quantum standards, final since 2024</div></div>
+    <div class="stat"><div class="num red">20M</div><div class="lbl">noisy qubits to break RSA-2048 in ~8 hours — Gidney–Ekerå estimate</div></div>
+    <div class="stat"><div class="num">2035</div><div class="lbl">US federal deadline to complete migration off quantum-vulnerable crypto</div></div>
+    <div class="stat"><div class="num">203·204·205</div><div class="lbl">NIST FIPS post-quantum standards, final since August 2024</div></div>
   </div>
 </div>
 
 <section id="threat">
   <div class="wrap">
-    <div class="section-label">Why now</div>
-    <h2>Harvest now, decrypt later.</h2>
+    <div class="kicker">Why now</div>
+    <h2>Harvest now, <em>decrypt later.</em></h2>
     <p>Adversaries don't need a quantum computer today to hurt you today. Encrypted traffic — customer records, contracts, health data — is being <strong>recorded now</strong> and stored until quantum hardware can open it. Anything with a shelf life longer than the quantum timeline is already exposed.</p>
 
     <div class="chart-panel reveal">
-      <div class="chart-title">Record qubits in a single processor, by year <span style="color:var(--cyan)">— log scale</span></div>
-      <div class="chart-sub">progress is exponential; the red line is where RSA-2048 falls</div>
+      <div class="chart-title">Record qubits in a single processor, by year</div>
+      <div class="chart-sub">log scale — progress is exponential; the dashed red line is where RSA-2048 falls</div>
       <div style="position:relative">
-        <svg id="chart" viewBox="0 0 900 380" role="img" aria-label="Log-scale line chart: record qubit counts per processor grew from 27 in 2019 to over 1000 in 2023; a dashed projection reaches the red 20-million-qubit RSA-2048 threshold in the mid-2030s."></svg>
+        <svg id="chart" viewBox="0 0 900 360" role="img" aria-label="Log-scale line chart: record qubit counts per processor grew from 27 in 2019 to over 1000 in 2023; a dashed projection reaches the red 20-million-qubit RSA-2048 threshold in the mid-2030s."></svg>
         <div class="tooltip" id="tip"></div>
       </div>
     </div>
@@ -274,26 +309,23 @@
 
 <section id="process">
   <div class="wrap">
-    <div class="section-label">What we do</div>
-    <h2>Three steps to quantum-safe.</h2>
+    <div class="kicker">What we do</div>
+    <h2>Three steps to <em>quantum-safe.</em></h2>
     <div class="steps">
       <div class="step reveal">
-        <div class="num">STEP 01 — INVENTORY</div>
+        <div class="num">01 — INVENTORY</div>
         <h3>Find every lock</h3>
         <p>We scan your codebases, configs, certificates, and dependencies to map exactly where quantum-vulnerable cryptography lives. File-by-file report.</p>
-        <div class="hexline">4f 3a 52 53 41 2d 32 30 34 38 20 66 6f 75 6e 64</div>
       </div>
       <div class="step reveal">
-        <div class="num">STEP 02 — PLAN</div>
+        <div class="num">02 — PLAN</div>
         <h3>Rank the risk</h3>
         <p>Findings ranked by exposure and data lifetime, then a migration plan to ML-KEM and ML-DSA — with hybrid schemes that keep you compatible during transition.</p>
-        <div class="hexline">70 6c 61 6e 3a 20 4d 4c 2d 4b 45 4d 2d 37 36 38</div>
       </div>
       <div class="step reveal">
-        <div class="num">STEP 03 — MIGRATE</div>
+        <div class="num">03 — MIGRATE</div>
         <h3>Close the surface</h3>
-        <p>We work alongside your engineers to swap primitives, re-issue certificates, and verify with a re-scan that proves the vulnerable surface is closed.</p>
-        <div class="hexline">72 65 73 63 61 6e 3a 20 30 20 63 72 69 74 69 63</div>
+        <p>We work alongside your engineers to swap primitives, re-issue certificates, and verify with a re-scan that proves the surface is closed.</p>
       </div>
     </div>
   </div>
@@ -301,8 +333,8 @@
 
 <section id="proof">
   <div class="wrap">
-    <div class="section-label">Proof, not promises</div>
-    <h2>Our scanner is open source.</h2>
+    <div class="kicker">Proof, not promises</div>
+    <h2>Our scanner is <em>open source.</em></h2>
     <p>Run it on your own code before you ever talk to us. If it finds nothing, you don't need us — and you'll know either way in under a minute.</p>
 
     <div class="terminal">
@@ -311,38 +343,38 @@
         <span>pqc-scan — your-api/</span>
       </div>
       <div class="terminal-body" id="term">
-        <div class="line t-cyan">$ pqc-scan ./your-api --report</div>
+        <div class="line t-ink">$ pqc-scan ./your-api --report</div>
         <div class="line t-dim">scanning 1,204 files…</div>
-        <div class="line t-red">🔴 CRITICAL  auth/tokens.py:41   RSA-2048 key generation</div>
-        <div class="line t-red">🔴 CRITICAL  tls/config.yml:12   ECDHE key exchange</div>
-        <div class="line t-yellow">🟡 WARNING   crypto/cipher.go:8  AES-128-GCM</div>
-        <div class="line t-green">🟢 SAFE      vault/kem.rs:3      ML-KEM-768 (FIPS 203)</div>
-        <div class="line">── 14 critical · 6 warnings · 2 quantum-safe ──</div>
-        <div class="line t-dim">full migration plan: shorproof audit</div>
+        <div class="line"><span class="t-red">CRITICAL</span>  auth/tokens.py:41   RSA-2048 key generation</div>
+        <div class="line"><span class="t-red">CRITICAL</span>  tls/config.yml:12   ECDHE key exchange</div>
+        <div class="line"><span class="t-dim">WARNING </span>  crypto/cipher.go:8  AES-128-GCM</div>
+        <div class="line"><span class="t-green">SAFE    </span>  vault/kem.rs:3      ML-KEM-768 (FIPS 203)</div>
+        <div class="line t-dim">14 critical · 6 warnings · 2 quantum-safe</div>
       </div>
     </div>
 
     <pre class="clone">git clone https://github.com/Fernandoleano/quantum-playground
 cd quantum-playground/business/pqc_scanner
 python scanner.py /path/to/your/project</pre>
-    <a class="repo" href="https://github.com/Fernandoleano/quantum-playground">→ github.com/Fernandoleano/quantum-playground</a>
+    <a class="repo" href="https://github.com/Fernandoleano/quantum-playground">github.com/Fernandoleano/quantum-playground</a>
   </div>
 </section>
 
 <section class="contact" id="contact">
-  <div class="wrap" data-cipher="a8f3…4d21 e0b9…77c4 03fd…9e12 c65a…08bb 4419…f3d7">
-    <div class="section-label" style="text-align:center">Get started</div>
-    <h2>Book a readiness audit.</h2>
+  <div class="glow"></div>
+  <div class="wrap">
+    <div class="kicker">Get started</div>
+    <h2>Book a <em>readiness audit.</em></h2>
     <p>Fixed scope, fixed price. Full crypto inventory, risk ranking, and a migration plan your team can execute — with or without us.</p>
-    <a class="cta" href="mailto:fernandoleano4@gmail.com?subject=PQC%20Readiness%20Audit">Email us to book</a>
+    <a class="btn" href="mailto:fernandoleano4@gmail.com?subject=PQC%20Readiness%20Audit">Email us to book</a>
   </div>
 </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <span>shor<span class="safe">proof</span> — post-quantum cryptography audits</span>
-    <span>RSA is temporary. <span class="safe">Lattices are forever.</span></span>
+    <span>Shorproof — post-quantum cryptography audits</span>
+    <span>RSA is temporary. Lattices are forever.</span>
   </div>
 </footer>
 
@@ -351,137 +383,44 @@ python scanner.py /path/to/your/project</pre>
   "use strict";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- cipher rain ---------- */
-  const rain = document.getElementById("rain");
-  const rctx = rain.getContext("2d");
-  const GLYPHS = "0123456789abcdef∎⌁⌬λΣΨΩ";
-  let cols = [], fontSize = 14;
-  function sizeRain() {
-    rain.width = innerWidth; rain.height = innerHeight;
-    const n = Math.floor(innerWidth / (fontSize * 1.6));
-    cols = Array.from({ length: n }, () => Math.random() * -innerHeight);
-  }
-  sizeRain(); addEventListener("resize", sizeRain);
-  function drawRain() {
-    rctx.fillStyle = "rgba(7,13,22,.12)";
-    rctx.fillRect(0, 0, rain.width, rain.height);
-    rctx.font = fontSize + "px 'IBM Plex Mono', monospace";
-    for (let i = 0; i < cols.length; i++) {
-      const ch = GLYPHS[(Math.random() * GLYPHS.length) | 0];
-      rctx.fillStyle = Math.random() < .03 ? "rgba(63,224,208,.9)" : "rgba(63,224,208,.28)";
-      rctx.fillText(ch, i * fontSize * 1.6, cols[i]);
-      cols[i] = cols[i] > rain.height + 200 ? Math.random() * -400 : cols[i] + fontSize * (0.35 + (i % 5) * 0.08);
-    }
-  }
-
-  /* ---------- globe ---------- */
-  const globe = document.getElementById("globe");
-  const gctx = globe.getContext("2d");
-  const G = globe.width, R = G * 0.36, CX = G / 2, CY = G / 2;
-  // fibonacci sphere
-  const N = 750, pts = [];
-  const GA = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < N; i++) {
-    const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = GA * i;
-    pts.push([Math.cos(th) * r, y, Math.sin(th) * r]);
-  }
-  // arcs: pairs of surface points, pulse travels along elevated path
-  function rndPt() { return pts[(Math.random() * pts.length) | 0]; }
-  const arcs = Array.from({ length: 6 }, () => ({ a: rndPt(), b: rndPt(), t: Math.random() }));
-  function rotY(p, ang) {
-    const [x, y, z] = p, c = Math.cos(ang), s = Math.sin(ang);
-    return [x * c + z * s, y, -x * s + z * c];
-  }
-  function project(p) { return [CX + p[0] * R, CY - p[1] * R, p[2]]; }
-  function slerpElevated(a, b, t) {
-    // simple lerp + normalize + elevation bump: good enough visually
-    const m = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-    const len = Math.hypot(m[0], m[1], m[2]) || 1;
-    const lift = 1 + 0.35 * Math.sin(Math.PI * t);
-    return [m[0] / len * lift, m[1] / len * lift, m[2] / len * lift];
-  }
-  let ang = 0;
-  function drawGlobe() {
-    gctx.clearRect(0, 0, G, G);
-    // sphere outline glow
-    gctx.beginPath(); gctx.arc(CX, CY, R, 0, Math.PI * 2);
-    gctx.strokeStyle = "rgba(63,224,208,.25)"; gctx.lineWidth = 1; gctx.stroke();
-    // dots
-    for (const p of pts) {
-      const q = rotY(p, ang), [sx, sy, z] = project(q);
-      if (z < -0.15) continue; // cull far side mostly
-      const a = 0.15 + 0.75 * ((z + 1) / 2);
-      gctx.fillStyle = "rgba(63,224,208," + a.toFixed(3) + ")";
-      const s = z > 0.6 ? 1.8 : 1.2;
-      gctx.fillRect(sx, sy, s, s);
-    }
-    // arcs + pulses
-    for (const arc of arcs) {
-      arc.t += 0.006;
-      if (arc.t > 1.15) { arc.a = rndPt(); arc.b = rndPt(); arc.t = 0; }
-      gctx.beginPath();
-      let started = false;
-      for (let t = 0; t <= 1.0001; t += 0.04) {
-        const q = rotY(slerpElevated(arc.a, arc.b, t), ang), [sx, sy, z] = project(q);
-        if (z < -0.2) { started = false; continue; }
-        started ? gctx.lineTo(sx, sy) : gctx.moveTo(sx, sy); started = true;
+  /* ---------- lattice cube: 3x3x3 cells, CSS 3D, slow rotation ---------- */
+  const lattice = document.getElementById("lattice");
+  const STEP = 62, HALF = 27; // cell spacing & half face size
+  const FACES = [
+    "rotateY(0deg) translateZ(" + HALF + "px)",
+    "rotateY(90deg) translateZ(" + HALF + "px)",
+    "rotateY(180deg) translateZ(" + HALF + "px)",
+    "rotateY(-90deg) translateZ(" + HALF + "px)",
+    "rotateX(90deg) translateZ(" + HALF + "px)",
+    "rotateX(-90deg) translateZ(" + HALF + "px)",
+  ];
+  const hotIndex = 22; // one vulnerable cell, slightly off-center
+  let idx = 0;
+  for (let ix = -1; ix <= 1; ix++)
+    for (let iy = -1; iy <= 1; iy++)
+      for (let iz = -1; iz <= 1; iz++) {
+        const cell = document.createElement("div");
+        cell.className = "cell" + (idx === hotIndex ? " hot" : "");
+        cell.style.transform = "translate3d(" + ix * STEP + "px," + iy * STEP + "px," + iz * STEP + "px)";
+        FACES.forEach((f, fi) => {
+          const face = document.createElement("div");
+          face.className = "face f" + fi;
+          face.style.transform = f;
+          cell.appendChild(face);
+        });
+        lattice.appendChild(cell);
+        idx++;
       }
-      gctx.strokeStyle = "rgba(255,107,74,.28)"; gctx.lineWidth = 1; gctx.stroke();
-      const tt = Math.min(arc.t, 1);
-      const q = rotY(slerpElevated(arc.a, arc.b, tt), ang), [sx, sy, z] = project(q);
-      if (z > -0.2) {
-        gctx.beginPath(); gctx.arc(sx, sy, 2.4, 0, Math.PI * 2);
-        gctx.fillStyle = "rgba(255,107,74,.95)"; gctx.fill();
-      }
-    }
-    ang += 0.0035;
+  let a = -0.4, b = 0.7;
+  function spin() {
+    a += 0.0016; b += 0.0022;
+    lattice.style.transform = "rotateX(" + (Math.sin(a) * 0.35 - 0.4) + "rad) rotateY(" + b + "rad)";
+    requestAnimationFrame(spin);
   }
+  if (!reduced) spin();
+  else lattice.style.transform = "rotateX(-0.4rad) rotateY(0.6rad)";
 
-  /* ---------- animation loop (single rAF for rain + globe) ---------- */
-  if (!reduced) {
-    (function loop() { drawRain(); drawGlobe(); requestAnimationFrame(loop); })();
-  } else { drawGlobe(); }
-
-  /* ---------- headline scramble ---------- */
-  const el = document.querySelector(".scramble");
-  if (el && !reduced) {
-    const target = el.dataset.text, CH = "!<>-_\\/[]{}—=+*^?#$%&";
-    let frame = 0;
-    (function tick() {
-      let out = "", done = 0;
-      for (let i = 0; i < target.length; i++) {
-        if (frame > i * 4 + 12) { out += target[i]; done++; }
-        else out += CH[(Math.random() * CH.length) | 0];
-      }
-      el.textContent = out;
-      frame++;
-      if (done < target.length) requestAnimationFrame(tick);
-    })();
-  }
-
-  /* ---------- counters ---------- */
-  const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(0) + "M" : String(n);
-  const io = new IntersectionObserver(entries => {
-    for (const e of entries) {
-      if (!e.isIntersecting) continue;
-      io.unobserve(e.target);
-      const nums = e.target.querySelectorAll(".num");
-      nums.forEach(num => {
-        const end = +num.dataset.count, fips = num.dataset.fips, plain = num.dataset.plain;
-        if (reduced) { num.textContent = fips ? "203·204·205" : plain ? String(end) : fmt(end); return; }
-        const t0 = performance.now(), dur = 1400;
-        (function step(t) {
-          const k = Math.min((t - t0) / dur, 1), eased = 1 - Math.pow(1 - k, 3);
-          const v = Math.round(end * eased);
-          num.textContent = fips ? (k < 1 ? String(v) : "203·204·205") : plain ? String(v) : fmt(v);
-          if (k < 1) requestAnimationFrame(step);
-        })(t0);
-      });
-    }
-  }, { threshold: .4 });
-  io.observe(document.getElementById("stats"));
-
-  /* ---------- reveal on scroll + terminal replay ---------- */
+  /* ---------- reveals ---------- */
   const rio = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); }
   }), { threshold: .2 });
@@ -492,60 +431,50 @@ python scanner.py /path/to/your/project</pre>
   }), { threshold: .3 }).observe(term);
 
   /* ---------- chart: record qubits per processor, log scale ---------- */
-  const DATA = [ // [year, qubits, label]
+  const DATA = [
     [2019, 27, "Falcon"], [2020, 65, "Hummingbird"], [2021, 127, "Eagle"],
     [2022, 433, "Osprey"], [2023, 1121, "Condor"],
   ];
-  const THRESH = 2e7; // Gidney–Ekerå: ~20M noisy qubits, RSA-2048, 8h
+  const THRESH = 2e7;
   const svg = document.getElementById("chart");
   const NS = "http://www.w3.org/2000/svg";
-  const W = 900, H = 380, M = { l: 64, r: 30, t: 26, b: 40 };
+  const W = 900, H = 360, M = { l: 60, r: 26, t: 24, b: 38 };
   const x = yr => M.l + (yr - 2019) / (2036 - 2019) * (W - M.l - M.r);
-  const y = q => { // log10 scale, 10^0 .. 10^8
-    const lo = 0, hi = 8, v = Math.log10(q);
-    return H - M.b - (v - lo) / (hi - lo) * (H - M.t - M.b);
-  };
+  const y = q => H - M.b - (Math.log10(q) / 8) * (H - M.t - M.b);
   function make(tag, attrs, parent) {
     const n = document.createElementNS(NS, tag);
     for (const k in attrs) n.setAttribute(k, attrs[k]);
     (parent || svg).appendChild(n); return n;
   }
-  // gridlines at powers of 10
+  const SUP = { 2: "²", 4: "⁴", 6: "⁶", 8: "⁸" };
   for (let e = 0; e <= 8; e += 2) {
-    const gy = y(Math.pow(10, e));
-    make("line", { x1: M.l, x2: W - M.r, y1: gy, y2: gy, stroke: "rgba(122,140,160,.14)", "stroke-width": 1 });
-    const SUP = { 2: "²", 4: "⁴", 6: "⁶", 8: "⁸" };
+    const gy = y(Math.pow(10, e) || 1);
+    make("line", { x1: M.l, x2: W - M.r, y1: gy, y2: gy, stroke: "rgba(255,255,255,.06)", "stroke-width": 1 });
     const t = make("text", { x: M.l - 10, y: gy + 4, "text-anchor": "end" });
     t.textContent = e === 0 ? "1" : "10" + SUP[e];
   }
-  // x labels
   for (const yr of [2019, 2023, 2027, 2031, 2035]) {
     const t = make("text", { x: x(yr), y: H - M.b + 24, "text-anchor": "middle" });
     t.textContent = yr;
   }
-  // threshold line
   const ty = y(THRESH);
-  make("line", { x1: M.l, x2: W - M.r, y1: ty, y2: ty, stroke: "#FF6B4A", "stroke-width": 1.5, "stroke-dasharray": "6 5" });
-  const tl = make("text", { x: W - M.r, y: ty - 8, "text-anchor": "end", class: "threshold-label" });
+  make("line", { x1: M.l, x2: W - M.r, y1: ty, y2: ty, stroke: "#F87066", "stroke-width": 1, "stroke-dasharray": "5 6", opacity: .8 });
+  const tl = make("text", { x: W - M.r, y: ty - 9, "text-anchor": "end", class: "threshold-label" });
   tl.textContent = "RSA-2048 falls here — ~20M qubits";
-  // real data line
   let d = "";
   DATA.forEach((p, i) => { d += (i ? "L" : "M") + x(p[0]) + " " + y(p[1]) + " "; });
-  const path = make("path", { d, fill: "none", stroke: "#3FE0D0", "stroke-width": 2, "stroke-linecap": "round" });
-  // projection: continue the 2019–2023 growth rate (~2.5×/yr) as dashed line
-  const rate = Math.pow(1121 / 27, 1 / 4); // per-year multiplier from data
-  let pd = "M" + x(2023) + " " + y(1121) + " ";
-  let py = 2023, pq = 1121;
+  const path = make("path", { d, fill: "none", stroke: "#EDEDED", "stroke-width": 1.8, "stroke-linecap": "round" });
+  const rate = Math.pow(1121 / 27, 1 / 4);
+  let pd = "M" + x(2023) + " " + y(1121) + " ", py = 2023, pq = 1121;
   while (pq < THRESH * 1.6 && py < 2036) { py += 1; pq *= rate; pd += "L" + x(py) + " " + y(pq) + " "; }
-  make("path", { d: pd, fill: "none", stroke: "rgba(63,224,208,.45)", "stroke-width": 1.5, "stroke-dasharray": "3 5" });
-  const sl = make("text", { x: x(2024) + 6, y: y(4000), class: "series-label" });
+  make("path", { d: pd, fill: "none", stroke: "rgba(237,237,237,.35)", "stroke-width": 1.4, "stroke-dasharray": "2 6", "stroke-linecap": "round" });
+  const sl = make("text", { x: x(2020.6), y: y(27) + 26, class: "series-label" });
   sl.textContent = "record qubits (real)";
-  const pl = make("text", { x: x(2029), y: y(2e5), fill: "rgba(63,224,208,.6)" });
-  pl.textContent = "if the trend holds…"; pl.setAttribute("style", "fill:rgba(63,224,208,.6)");
-  // dots + tooltip
+  const pl = make("text", { x: x(2028.4), y: y(1.1e5) });
+  pl.textContent = "if the trend holds…";
   const tip = document.getElementById("tip");
   DATA.forEach(p => {
-    const c = make("circle", { cx: x(p[0]), cy: y(p[1]), r: 4.5, fill: "#3FE0D0", stroke: "#070D16", "stroke-width": 2 });
+    make("circle", { cx: x(p[0]), cy: y(p[1]), r: 3.5, fill: "#EDEDED", stroke: "#000", "stroke-width": 2 });
     const hit = make("circle", { cx: x(p[0]), cy: y(p[1]), r: 14, fill: "transparent", style: "cursor:pointer" });
     hit.addEventListener("mouseenter", () => {
       tip.textContent = p[0] + " · IBM " + p[2] + " · " + p[1].toLocaleString() + " qubits";
@@ -556,7 +485,6 @@ python scanner.py /path/to/your/project</pre>
     });
     hit.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
   });
-  // draw-in animation
   if (!reduced) {
     const len = path.getTotalLength();
     path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
